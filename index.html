@@ -2,842 +2,852 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>수강료 계산기</title>
-  <!-- jQuery 및 jQuery UI CDN -->
+  <title>2025 가을학기 수강료 계산기</title>
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-  <!-- Select2 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
-  <!-- Select2 JS -->
-  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 30px;
-      background: #f9f9f9;
-    }
-    h2 {
-      color: #333;
-      margin-bottom: 20px;
-    }
-    form {
+    body { font-family: 'Noto Sans KR', Arial, sans-serif; background: #f9f9f9; margin: 40px; font-size: 18px;}
+    form { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; max-width: 700px; }
+    .form-group { margin-bottom: 28px; position:relative; }
+    label { font-weight: bold; margin-right: 8px; font-size: 17px;}
+    input[type="text"], select, input[type="date"], input[type="button"] {
+      padding: 0 16px;
+      border-radius: 7px;
+      border: 1px solid #bbb;
+      font-size: 17px;
+      height: 48px;
+      box-sizing: border-box;
       background: #fff;
-      padding: 20px;
-      border-radius: 6px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-      max-width: 600px;
     }
-    .form-group {
-      margin-bottom: 15px;
+    #courseSelectorBtn {
+      width: 400px;
+      background: #f6f8fa;
+      text-align: left;
+      cursor: pointer;
+    }
+    #selectedCourseLabel {
+      display: inline-block;
+      width: 330px;
+      vertical-align: middle;
+      font-size: 17px;
+      padding-left: 5px;
+      color: #1a1a1a;
+    }
+    #courseTreeMenuWrap {
+      position: absolute; z-index: 9999;
+      background: #fff;
+      border: 1px solid #bbb;
+      border-radius: 10px;
+      margin-top: 5px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.12);
+      width: 400px;
+      display: none;
+    }
+    #courseSearchBox {
+      width: 96%; margin:10px 2% 0 2%;
+      height: 38px; font-size:16px;
+      border: 1px solid #d0d0d0; border-radius:7px;
+      box-sizing: border-box; padding-left:12px;
+    }
+    #courseTreeMenu ul { list-style:none; padding:0; margin:0;}
+    #courseTreeMenu > ul > li {
+      padding: 12px 18px 11px 14px; font-size:18px; font-weight:700;
+      background:#f4f4f7; cursor:pointer; border-bottom:1px solid #eee;
+    }
+    #courseTreeMenu > ul > li:hover { background: #e4ecf5;}
+    #courseTreeMenu ul li ul {
+      background: #fff; border-radius:0 0 10px 10px; border:none;
+      max-height: 400px; overflow-y: auto; margin-top:2px;
+    }
+    #courseTreeMenu ul li ul li {
+      font-size:17px; font-weight:400;
+      padding:11px 22px 11px 28px; background:#fff; border-bottom:1px solid #f2f2f2; cursor:pointer;
+      transition:background 0.2s;
+    }
+    #courseTreeMenu ul li ul li:last-child { border-bottom:none;}
+    #courseTreeMenu ul li ul li:hover {
+      background:#eaf5ff; color:#12598e;
+    }
+    .option-group { margin: 13px 0 0 120px; z-index:2; position:relative;}
+    .option-row { margin-bottom: 10px; }
+    .option-group label { margin-right: 22px; font-weight: normal; display: block; margin-bottom: 3px;}
+    .option-group input[type="checkbox"], .option-group input[type="radio"] { transform: scale(1.12); margin-right:4px; vertical-align:middle; }
+    .inline-block { display: inline-block; }
+    .checkbox-group label { margin-right: 26px; }
+    button { background: #2078bf; color: #fff; border: none; border-radius: 4px; padding: 13px 38px; font-size: 17px; margin-top: 12px; cursor: pointer; }
+    button:hover { background: #12598e; }
+    #reservationInfo { margin-top: 32px; background: #fff; border: 1px solid #c6c6c6; border-radius: 7px; padding: 22px; max-width: 540px; font-size: 17px;}
+    #reservationInfo p { margin: 10px 0; }
+    #toast { visibility: hidden; background: #222; color: #fff; position: fixed; top: 36px; left: 36px; border-radius: 4px; padding: 13px 24px; opacity: 0; z-index: 10000; transition: opacity .5s; font-size: 17px;}
+    .ui-datepicker { font-size:17px; z-index:10010 !important;}
+    .select2-container { font-size: 17px; }
+    .select2-dropdown { z-index: 100000 !important; }
+    .form-group.duration { z-index:110 !important; }
+    .form-group.discount { z-index:10 !important; }
+    body, form, .form-group { overflow: visible !important; }
+    .form-group.duration .select2-container {
+      width: 20% !important;
+      min-width: 88px !important;
+      max-width: 120px !important;
+      text-align:left !important;
+    }
+    .form-group.duration .select2-selection {
+      height: 48px !important;
+      padding: 7px 0 7px 16px !important;
+      font-size: 17px !important;
+      border-radius: 7px;
+      text-align:left !important;
+    }
+    form .form-group {
       display: flex;
       align-items: center;
+      gap: 14px;
     }
-    label {
-      width: 160px;
-      margin-right: 10px;
-      font-weight: bold;
+    form .form-group label {
+      min-width: 100px;
+      margin-bottom: 0;
+      text-align: left;
     }
-    .form-group input[type="text"],
-    .form-group input[type="number"],
-    .form-group select:not(.select2-hidden-accessible) {
+    form .form-group input,
+    form .form-group select,
+    form .form-group .select2-container {
       flex: none;
-      width: 250px;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      margin: 0;
     }
-    button {
-      padding: 10px 20px;
-      border: none;
-      background-color: #337ab7;
-      color: #fff;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-    button:hover {
-      background-color: #286090;
-    }
-    #reservationInfo {
-      background: #fff;
-      padding: 15px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    #reservationInfo p {
-      margin: 8px 0;
-    }
-    /* Select2 드롭다운 스타일 */
-    .select2-container {
-      width: 400px !important;
-    }
-    .select2-container--default .select2-results__options {
-      max-height: 500px !important;
-      overflow-y: auto;
-    }
-    /* AP 시간 선택 컨테이너 스타일 (폼 그룹과 유사하게) */
-    #apTimeContainer {
-      margin-bottom: 15px;
-      padding-left: 170px;
-    }
-    /* 토스트 메시지 스타일 */
-    #toast {
-      visibility: hidden;
-      min-width: 200px;
-      background-color: #333;
-      color: #fff;
-      text-align: center;
-      border-radius: 4px;
-      padding: 10px;
-      position: fixed;
-      top: 30px;
-      left: 20px;
-      z-index: 9999;
-      opacity: 0;
-      transition: opacity 0.5s ease-in-out;
+    .form-group input[type="button"],
+    .form-group .select2-container {
+      margin-left: 0;
     }
   </style>
-  <script>
-    function showToast(message) {
-      var toast = document.getElementById("toast");
-      toast.textContent = message;
-      toast.style.visibility = "visible";
-      toast.style.opacity = "1";
-      setTimeout(function() {
-        toast.style.opacity = "0";
-        setTimeout(function() { toast.style.visibility = "hidden"; }, 500);
-      }, 2500);
-    }
-    
-    (function(factory) {
-      if (typeof define === "function" && define.amd) {
-        define(["jquery", "jquery-ui"], factory);
-      } else {
-        factory(jQuery);
-      }
-    }(function($) {
-      $.datepicker.regional['ko'] = {
-        closeText: '닫기',
-        prevText: '이전',
-        nextText: '다음',
-        currentText: '오늘',
-        monthNames: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
-        monthNamesShort: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
-        dayNames: ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'],
-        dayNamesShort: ['일','월','화','수','목','금','토'],
-        dayNamesMin: ['일','월','화','수','목','금','토'],
-        weekHeader: '주',
-        dateFormat: 'yy-mm-dd',
-        firstDay: 0,
-        isRTL: false,
-        showMonthAfterYear: true,
-        yearSuffix: '년'
-      };
-      $.datepicker.setDefaults($.datepicker.regional['ko']);
-    }));
-    
-    // AP 시간 옵션 설정
-    var apTimeOptions = {
-      group1: {
-        courses: ["여름방학 AP Phy1", "여름방학 AP Cal BC", "여름방학 AP Cal AB", "여름방학 AP Pre-cal", "여름방학 AP World History", "여름방학 AP Biology"],
-        options: [
-          { label: "오전 (09:00~11:00)", time: "09:00~11:00" },
-          { label: "오후 (18:20~20:20)", time: "18:20~20:20" }
-        ]
-      },
-      group2: {
-        courses: ["여름방학 AP Phy C-M", "여름방학 AP Macro Econ", "여름방학 AP Micro Econ", "여름방학 AP Psychology", "여름방학 AP Statistics", "여름방학 AP Chemistry", "여름방학 AP Computer.A"],
-        options: [
-          { label: "오전 (11:10~13:10)", time: "11:10~13:10" },
-          { label: "오후 (20:30~22:30)", time: "20:30~22:30" }
-        ]
-      }
-    };
-    
-    // 과목 정보
-    var courseData = {
-      "여름방학 Algebra 1 오프라인": { category: "Drill Math", weeklyRate: 250000, time: "14:00~16:00" },
-      "여름방학 Algebra 1 온라인": { category: "Drill Math", weeklyRate: 250000, time: "16:10~18:10(한국시간)" },
-      "여름방학 Algebra 2 오프라인": { category: "Drill Math", weeklyRate: 250000, time: "14:00~16:00" },
-      "여름방학 Algebra 2 온라인": { category: "Drill Math", weeklyRate: 250000, time: "16:10~18:10(한국시간)" },
-      // DRW 카테고리 (추가된 항목 포함)
-      "여름방학 DRW 오전 L1": { category: "DRW", weeklyRate: 330000, time: "10:00~13:00(한국시간)" },
-      "여름방학 DRW 오전 L2": { category: "DRW", weeklyRate: 330000, time: "10:00~13:00(한국시간)" },
-      "여름방학 DRW L1A": { category: "DRW", weeklyRate: 330000, time: "19:00~22:00(한국시간)" },
-      "여름방학 DRW L1B": { category: "DRW", weeklyRate: 330000, time: "20:00~23:00(한국시간)" },
-      "여름방학 DRW L2A": { category: "DRW", weeklyRate: 330000, time: "19:00~22:00(한국시간)" },
-      "여름방학 DRW L2B": { category: "DRW", weeklyRate: 330000, time: "20:00~23:00(한국시간)" },
-      "여름방학 DRW L3":  { category: "DRW", weeklyRate: 330000, time: "20:00~23:00(한국시간)" },
-      "여름방학 W올인원": { category: "W올인원", weeklyRate: 440000, time: "09:00~13:00" },
-      "여름방학 TOEFL L1 오프라인": { category: "TOEFL", weeklyRate: 520000, time: "09:00~13:00" },
-      "여름방학 TOEFL L1 오전 온라인": { category: "TOEFL", weeklyRate: 520000, time: "09:00~13:00(한국시간)" },
-      "여름방학 TOEFL L1 오후 온라인": { category: "TOEFL", weeklyRate: 520000, time: "13:30~17:30(한국시간)" },
-      "여름방학 TOEFL L2 오프라인": { category: "TOEFL", weeklyRate: 520000, time: "09:00~13:00" },
-      "여름방학 TOEFL L2 오전 온라인": { category: "TOEFL", weeklyRate: 520000, time: "09:00~13:00(한국시간)" },
-      "여름방학 TOEFL L2 오후 온라인": { category: "TOEFL", weeklyRate: 520000, time: "13:30~17:30(한국시간)" },
-      "여름방학 SAT 브릿지 오프라인": { category: "SAT", weeklyRate: 950000, time: "09:00~17:00" },
-      "여름방학 SAT 브릿지 온라인": { category: "SAT", weeklyRate: 950000, time: "13:00~21:00(한국시간)" },
-      "여름방학 SAT 1400+ 오프라인": { category: "SAT", weeklyRate: 950000, time: "09:00~17:00" },
-      "여름방학 SAT 1400+ 온라인": { category: "SAT", weeklyRate: 950000, time: "13:00~21:00(한국시간)" },
-      "여름방학 SAT 1500+ 오프라인": { category: "SAT", weeklyRate: 950000, time: "09:00~17:00" },
-      "여름방학 SAT 1500+ 온라인": { category: "SAT", weeklyRate: 950000, time: "13:00~21:00(한국시간)" },
-      "여름방학 SAT 미주반": { category: "SAT미주/유럽", weeklyRate: 560000, time: "10:00~14:00(한국시간)" },
-      "여름방학 SAT 유럽반": { category: "SAT미주/유럽", weeklyRate: 560000, time: "17:00~21:00(한국시간)" },
-      "여름방학 AP Phy1":         { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP Cal BC":        { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP Cal AB":        { category: "AP", threeWeekRate: 1380000, time: "시간 미정" },
-      "여름방학 AP Pre-cal":       { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP World History": { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP Biology":       { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP Phy C-M":       { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP Macro Econ":    { category: "AP", threeWeekRate: 1035000, time: "시간 미정" },
-      "여름방학 AP Micro Econ":    { category: "AP", threeWeekRate: 1035000, time: "시간 미정" },
-      "여름방학 AP Psychology":    { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP Statistics":    { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP Chemistry":     { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP Computer.A":    { category: "AP", threeWeekRate: 1725000, time: "시간 미정" }
-    };
-    
-    function isDateAllowed(date) {
-      if (date.getFullYear() === 2025 && date.getMonth() === 5 &&
-          date.getDate() >= 1 && date.getDate() <= 15) {
-        return false;
-      }
-      var course = $("#course").val();
-      var courseInfo = courseData[course];
-      var courseCategory = courseInfo ? courseInfo.category : "";
-      if (courseCategory === "AP") {
-        if (date.getFullYear() === 2025 && date.getMonth() === 6 &&
-            (date.getDate() === 7 || date.getDate() === 8)) {
-          return false;
-        }
-      }
-      if ((courseCategory === "DRW" || courseCategory === "Drill Math" ||
-           courseCategory === "W올인원") &&
-          date.getFullYear() === 2025 && date.getMonth() === 5 &&
-          date.getDate() === 16) {
-        return false;
-      }
-      var allowedDay = (course === "여름방학 AP Micro Econ") ? 2 : 1;
-      return date.getDay() === allowedDay;
-    }
-    
-    $(function() {
-      $("#course").select2({
-        placeholder: "수강과목을 선택하세요",
-        allowClear: true
-      });
-      
-      $("#startDate").datepicker({
-        dateFormat: "yy-mm-dd",
-        minDate: new Date(2025, 5, 16),
-        maxDate: new Date(2025, 7, 31),
-        beforeShowDay: function(date) {
-          if (date.getFullYear() === 2025 && date.getMonth() === 5 &&
-              date.getDate() >= 1 && date.getDate() <= 15) {
-            return [false, "", "Unavailable"];
-          }
-          var allowed = isDateAllowed(date);
-          return [allowed, "", allowed ? "Available" : "Not allowed"];
-        }
-      });
-      
-      $("#course").on("change", function() {
-        var selectedDateStr = $("#startDate").val();
-        if (selectedDateStr) {
-          try {
-            var selectedDate = $.datepicker.parseDate("yy-mm-dd", selectedDateStr);
-            if (!isDateAllowed(selectedDate)) {
-              $("#startDate").val("");
-            }
-          } catch(e) {
-            $("#startDate").val("");
-          }
-        }
-        $("#startDate").datepicker("refresh");
-        updateAPTimeOptions();
-      });
-      
-      $(document).keydown(function(e) {
-        if(e.altKey && e.which === 81) {
-          e.preventDefault();
-          calculateTuition();
-        } else if(e.altKey && e.which === 82) {
-          e.preventDefault();
-          copyReservationInfo();
-        }
-      });
-    });
-    
-    function formatDateWithDay(date) {
-      var month = date.getMonth() + 1;
-      var day = date.getDate();
-      var days = ["일", "월", "화", "수", "목", "금", "토"];
-      return month + ". " + day + "(" + days[date.getDay()] + ")";
-    }
-    
-    function updateAPTimeOptions() {
-      var course = $("#course").val();
-      var container = $("#apTimeContainer");
-      container.empty();
-      // AP 과목이 아니면 컨테이너 숨김
-      if (!courseData[course] || courseData[course].category !== "AP") {
-        container.hide();
-        return;
-      }
-      var group = null;
-      if (apTimeOptions.group1.courses.indexOf(course) !== -1) {
-        group = apTimeOptions.group1;
-      } else if (apTimeOptions.group2.courses.indexOf(course) !== -1) {
-        group = apTimeOptions.group2;
-      }
-      if (group) {
-        container.show();
-        container.append("<p>AP 시간 선택:</p>");
-        for (var i = 0; i < group.options.length; i++) {
-          var opt = group.options[i];
-          var radioId = "apTimeOption" + i;
-          var radio = '<label for="' + radioId + '" style="margin-right:15px;"><input type="radio" name="apTimeOption" id="' + radioId + '" value="' + opt.time + '"';
-          if (i === 0) radio += ' checked';
-          radio += '> ' + opt.label + '</label>';
-          container.append(radio);
-        }
-      } else {
-        container.hide();
-      }
-    }
-    
-    function calculateTuition() {
-      var name = document.getElementById("studentName").value;
-      var course = document.getElementById("course").value;
-      var startDateStr = document.getElementById("startDate").value;
-      var weeks = parseInt(document.getElementById("duration").value);
-      var discountRate = parseFloat(document.getElementById("discount").value);
-      
-      if (!startDateStr) {
-        showToast("수강 시작일을 선택해주세요.");
-        return;
-      }
-      
-      var startDate = new Date(startDateStr);
-      var sDay = startDate.getDay();
-      var firstFriday = new Date(startDate);
-      if (sDay <= 5) {
-        firstFriday.setDate(startDate.getDate() + (5 - sDay));
-      } else {
-        firstFriday.setDate(startDate.getDate() + (12 - sDay));
-      }
-      var endDate = new Date(firstFriday);
-      endDate.setDate(firstFriday.getDate() + (weeks - 1) * 7);
-      if (course === "여름방학 AP Micro Econ") {
-        endDate.setDate(endDate.getDate() + 1);
-      }
-      
-      var courseInfo = courseData[course];
-      if (!courseInfo) {
-        showToast("선택한 과목에 대한 정보가 없습니다.");
-        return;
-      }
-      
-      var totalFee = 0;
-      if (courseInfo.category === "AP") {
-        if (weeks > 3) {
-          alert("AP 과정은 최대 3주까지만 수강 가능합니다.");
-          return;
-        }
-        totalFee = (weeks === 3) ? courseInfo.threeWeekRate : Math.round(courseInfo.threeWeekRate / 3 * weeks);
-      } else {
-        totalFee = courseInfo.weeklyRate * weeks;
-      }
-      
-      var finalFee = Math.round(totalFee * (1 - discountRate));
-      
-      var selectedAPTime = "";
-      if (courseData[course].category === "AP") {
-        var apTimeRadio = document.querySelector('input[name="apTimeOption"]:checked');
-        if (apTimeRadio) {
-          selectedAPTime = apTimeRadio.value;
-        }
-      }
-      
-      document.getElementById("infoName").textContent = name;
-      document.getElementById("infoCourse").textContent = course;
-      document.getElementById("infoPeriod").textContent =
-        formatDateWithDay(startDate) + " ~ " + formatDateWithDay(endDate) + " (" + weeks + "주)";
-      document.getElementById("infoTime").textContent = (selectedAPTime !== "") ? selectedAPTime : courseInfo.time;
-      document.getElementById("infoFee").textContent = finalFee.toLocaleString() + "원 (" + (discountRate * 100) + "% 할인)";
-    }
-    
-    function copyReservationInfo() {
-      var name = document.getElementById("infoName").innerText;
-      var course = document.getElementById("infoCourse").innerText;
-      var period = document.getElementById("infoPeriod").innerText;
-      var time = document.getElementById("infoTime").innerText;
-      var fee = document.getElementById("infoFee").innerText;
-      
-      // 교재비 계산: W올인원은 수강기간(주) 매핑, TOEFL은 온라인/오프라인 구분
-      var textbookFee = "";
-      if (course.indexOf("W올인원") !== -1) {
-        var duration = parseInt(document.getElementById("duration").value);
-        var feeMapping = {1:"40,000원", 2:"50,000원", 3:"60,000원", 4:"70,000원", 5:"80,000원", 6:"90,000원"};
-        textbookFee = feeMapping[duration] || "";
-      } else if (course.indexOf("TOEFL") !== -1) {
-        if (course.indexOf("온라인") !== -1) {
-          textbookFee = "30,000원";
-        } else {
-          textbookFee = "60,000원";
-        }
-      }
-      
-      var infoText = "감사합니다. 수강 예약 안내드립니다.\n\n" +
-                     "▶학생이름: " + name + "\n" +
-                     "▶수강과목: " + course + "\n" +
-                     "▶수강기간: " + period + "\n" +
-                     "▶수업시간: " + time + "\n" +
-                     "▶수강료: " + fee + "\n";
-      if (textbookFee !== "") {
-        infoText += "▶교재비: " + textbookFee + "\n\n";
-      } else {
-        infoText += "\n";
-      }
-      
-      infoText += "※ 계좌이체는 학생이름으로 입금 부탁드리며, 현금영수증 필요 시 발급받으실 휴대폰/사업자 번호를 알려주시기 바랍니다.\n\n" +
-                  "[수강료 입금 계좌]\n신한은행 140-009-205058\n(예금주: 세한아카데미외국어학원)\n\n";
-      
-      if (textbookFee !== "") {
-        infoText += "[교재비 입금 계좌]\n신한은행 110-378-431090\n(예금주: 김철영 세한어학연구소)";
-      }
-      
-      navigator.clipboard.writeText(infoText).then(function() {
-        showToast("예약 안내가 복사되었습니다.");
-      }, function(err) {
-        showToast("복사에 실패했습니다: " + err);
-      });
-    }
-  </script>
 </head>
 <body>
-  <h2>수강료 계산기</h2>
-  <form id="tuitionForm">
+  <h2 style="font-size: 2.1em; font-weight: 900; letter-spacing: -1px;">2025 가을학기 수강료 계산기</h2>
+  <form id="tuitionForm" autocomplete="off" style="position:relative;">
     <div class="form-group">
-      <label for="studentName">학생이름:</label>
-      <input type="text" id="studentName" name="studentName" value="학생이름 기입" required>
+      <label for="studentName">학생 이름</label>
+      <input type="text" id="studentName" required placeholder="이름 입력">
+    </div>
+    <div class="form-group" style="position:relative;z-index:120;">
+      <label for="courseSelectorBtn">수강 과목</label>
+      <input type="button" id="courseSelectorBtn" value="과목을 선택하세요" readonly>
+      <span id="selectedCourseLabel"></span>
+      <div id="courseTreeMenuWrap">
+        <input type="text" id="courseSearchBox" placeholder="과목 검색">
+        <nav id="courseTreeMenu"></nav>
+      </div>
+      <select id="course" style="display:none"></select>
     </div>
     <div class="form-group">
-      <label for="course">수강과목:</label>
-      <select id="course" name="course">
-        <option value=""></option>
-        <optgroup label="Drill Math">
-          <option value="여름방학 Algebra 1 오프라인">여름방학 Algebra 1 오프라인</option>
-          <option value="여름방학 Algebra 1 온라인">여름방학 Algebra 1 온라인</option>
-          <option value="여름방학 Algebra 2 오프라인">여름방학 Algebra 2 오프라인</option>
-          <option value="여름방학 Algebra 2 온라인">여름방학 Algebra 2 온라인</option>
-        </optgroup>
-        <optgroup label="DRW">
-          <!-- 추가된 DRW 오전 코스 -->
-          <option value="여름방학 DRW 오전 L1">여름방학 DRW 오전 L1</option>
-          <option value="여름방학 DRW 오전 L2">여름방학 DRW 오전 L2</option>
-          <option value="여름방학 DRW L1A">여름방학 DRW L1A</option>
-          <option value="여름방학 DRW L1B">여름방학 DRW L1B</option>
-          <option value="여름방학 DRW L2A">여름방학 DRW L2A</option>
-          <option value="여름방학 DRW L2B">여름방학 DRW L2B</option>
-          <option value="여름방학 DRW L3">여름방학 DRW L3</option>
-        </optgroup>
-        <optgroup label="W올인원">
-          <option value="여름방학 W올인원">여름방학 W올인원</option>
-        </optgroup>
-        <optgroup label="TOEFL">
-          <option value="여름방학 TOEFL L1 오프라인">여름방학 TOEFL L1 오프라인</option>
-          <option value="여름방학 TOEFL L1 오전 온라인">여름방학 TOEFL L1 오전 온라인</option>
-          <option value="여름방학 TOEFL L1 오후 온라인">여름방학 TOEFL L1 오후 온라인</option>
-          <option value="여름방학 TOEFL L2 오프라인">여름방학 TOEFL L2 오프라인</option>
-          <option value="여름방학 TOEFL L2 오전 온라인">여름방학 TOEFL L2 오전 온라인</option>
-          <option value="여름방학 TOEFL L2 오후 온라인">여름방학 TOEFL L2 오후 온라인</option>
-        </optgroup>
-        <optgroup label="SAT">
-          <option value="여름방학 SAT 브릿지 오프라인">여름방학 SAT 브릿지 오프라인</option>
-          <option value="여름방학 SAT 브릿지 온라인">여름방학 SAT 브릿지 온라인</option>
-          <option value="여름방학 SAT 1400+ 오프라인">여름방학 SAT 1400+ 오프라인</option>
-          <option value="여름방학 SAT 1400+ 온라인">여름방학 SAT 1400+ 온라인</option>
-          <option value="여름방학 SAT 1500+ 오프라인">여름방학 SAT 1500+ 오프라인</option>
-          <option value="여름방학 SAT 1500+ 온라인">여름방학 SAT 1500+ 온라인</option>
-        </optgroup>
-        <optgroup label="SAT 미주/유럽">
-          <option value="여름방학 SAT 미주반">여름방학 SAT 미주반</option>
-          <option value="여름방학 SAT 유럽반">여름방학 SAT 유럽반</option>
-        </optgroup>
-        <optgroup label="AP">
-          <option value="여름방학 AP Phy1">여름방학 AP Phy1</option>
-          <option value="여름방학 AP Cal BC">여름방학 AP Cal BC</option>
-          <option value="여름방학 AP Cal AB">여름방학 AP Cal AB</option>
-          <option value="여름방학 AP Pre-cal">여름방학 AP Pre-cal</option>
-          <option value="여름방학 AP World History">여름방학 AP World History</option>
-          <option value="여름방학 AP Biology">여름방학 AP Biology</option>
-          <option value="여름방학 AP Phy C-M">여름방학 AP Phy C-M</option>
-          <option value="여름방학 AP Macro Econ">여름방학 AP Macro Econ</option>
-          <option value="여름방학 AP Micro Econ">여름방학 AP Micro Econ</option>
-          <option value="여름방학 AP Psychology">여름방학 AP Psychology</option>
-          <option value="여름방학 AP Statistics">여름방학 AP Statistics</option>
-          <option value="여름방학 AP Chemistry">여름방학 AP Chemistry</option>
-          <option value="여름방학 AP Computer.A">여름방학 AP Computer.A</option>
-        </optgroup>
-      </select>
+      <label for="startDate">수강 시작일</label>
+      <input type="text" id="startDate" required autocomplete="off" placeholder="날짜 선택">
     </div>
-    <!-- AP 시간 선택 컨테이너 추가 -->
-    <div id="apTimeContainer"></div>
-    <div class="form-group">
-      <label for="startDate">수강시작일:</label>
-      <input type="text" id="startDate" name="startDate" required>
+    <div id="extraOptions"></div>
+    <div class="form-group duration">
+      <label id="durationLabel" for="duration">수강 기간</label>
+      <select id="duration" required></select>
     </div>
-    <div class="form-group">
-      <label for="duration">수강기간:</label>
-      <select id="duration" name="duration">
-        <option value="1">1주</option>
-        <option value="2">2주</option>
-        <option value="3">3주</option>
-        <option value="4">4주</option>
-        <option value="5">5주</option>
-        <option value="6">6주</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label for="discount">할인율:</label>
-      <select id="discount" name="discount">
+    <div class="form-group discount">
+      <label for="discount">할인율</label>
+      <select id="discount" required>
+        <option value="0">0%</option>
         <option value="0.05">5%</option>
-        <option value="0.1">10%</option>
+        <option value="0.10">10%</option>
         <option value="0.15">15%</option>
-        <option value="0.2">20%</option>
+        <option value="0.20">20%</option>
+        <option value="0.25">25%</option>
       </select>
     </div>
     <button type="button" onclick="calculateTuition()">계산하기</button>
   </form>
-  
-  <div id="reservationInfo">
-    <p>▶ 학생이름: <span id="infoName"></span></p>
-    <p>▶ 수강과목: <span id="infoCourse"></span></p>
-    <p>▶ 수강기간: <span id="infoPeriod"></span></p>
-    <p>▶ 수업시간: <span id="infoTime"></span></p>
-    <p>▶ 수강료: <span id="infoFee"></span></p>
+  <div id="reservationInfo" style="display:none;">
+    <p>▶ <b>학생이름</b>: <span id="infoName"></span></p>
+    <p>▶ <b>수강과목</b>: <span id="infoCourse"></span></p>
+    <p>▶ <b>수강기간</b>: <span id="infoStart"></span></p>
+    <p>▶ <b>수업시간</b>: <span id="infoTime"></span></p>
+    <p>▶ <b>수강료</b>: <span id="infoFee"></span></p>
   </div>
-  
-  <button id="copyButton" onclick="copyReservationInfo()">복사</button>
+  <button id="copyButton" onclick="copyReservationInfo()" style="display:none;">복사</button>
   <div id="toast"></div>
-  
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/i18n/jquery-ui-i18n.min.js"></script>
   <script>
-    function showToast(message) {
-      var toast = document.getElementById("toast");
-      toast.textContent = message;
-      toast.style.visibility = "visible";
-      toast.style.opacity = "1";
-      setTimeout(function() {
-        toast.style.opacity = "0";
-        setTimeout(function() { toast.style.visibility = "hidden"; }, 500);
-      }, 2500);
+// (스크립트 시작 부분에 추가)
+const weekdayName = ['일', '월', '화', '수', '목', '금', '토'];
+// ========== 요일 제한 테이블 (분반/과목코드별) ==========
+const courseEnabledDays = {
+  sat_reg_weekend: [6, 0], // 토, 일
+  sat_reg_weekday: null,    // 평일(모든 요일)
+  sat_bridge_weekend: [6, 0], sat_bridge_weekday: null,
+  ap_calbc: [6], ap_phyc_m: [6], ap_phy1: [6], ap_microecon: [6], ap_precal: [6], ap_phy2: [6], ap_psych: [6], ap_phyc_em: [6],
+  ap_stat: [0], ap_chem: [0], ap_bio: [0], ap_macroecon: [0], ap_calab: [0], ap_worldhis: [0], ap_comsca: [0], ap_comscp: [0],
+  toefl_rl: [6], toefl_sw: [0], toefl_rlsw: [6], toefl_awesome: [6],
+  drw_l1a: [1, 3, 5], drw_l2a: [1, 3, 5], drw_americas: [1, 3, 5],
+  drw_l1b: [2, 4, 6], drw_l2b: [2, 4, 6],
+  drw_l3: [6, 0], drw_europe: [6, 0],
+  dm_alg1: [6], dm_alg2: [0], dm_geom: [6], dm_alg2pre: [0], dm_igcse: [0]
+};
+let enabledDays = null;
+
+function dayFilter(date) {
+  if (!enabledDays) return [true, ""];
+  return [enabledDays.includes(date.getDay()), ""];
+}
+
+// ⭐️ "setDatepickerEnabledDays"는 이걸로 전체 교체!
+function setDatepickerEnabledDays() {
+  const courseKey = document.getElementById('course').value;
+  let key = courseKey;
+  if (courseKey === 'sat_reg' || courseKey === 'sat_bridge') {
+    const division = document.querySelector('input[name="division"]:checked')?.value;
+    if (division === '주말') key += '_weekend';
+    else key += '_weekday';
+  }
+  enabledDays = courseEnabledDays[key] || null;
+  $('#startDate').datepicker('destroy');
+  $('#startDate').val('');
+  $('#startDate').datepicker({
+    dateFormat: "yy-mm-dd",
+    showButtonPanel: true,
+    changeMonth: true,
+    changeYear: true,
+    beforeShowDay: dayFilter
+  });
+}
+
+// ========== 달력(datepicker) 관련 ==========
+$.datepicker.setDefaults({
+  dateFormat: 'yy-mm-dd',
+  prevText: '이전 달',
+  nextText: '다음 달',
+  monthNames: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+  monthNamesShort: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
+  dayNames: ['일','월','화','수','목','금','토'],
+  dayNamesShort: ['일','월','화','수','목','금','토'],
+  dayNamesMin: ['일','월','화','수','목','금','토'],
+  showMonthAfterYear: true,
+  yearSuffix: '년'
+});
+$('#startDate').datepicker({
+  dateFormat: "yy-mm-dd",
+  showButtonPanel: true,
+  changeMonth: true,
+  changeYear: true,
+  beforeShowDay: dayFilter
+});
+
+// ⭐️ "분반 라디오 바꿀 때도 즉시 반영!" 까지 붙이세요!
+document.getElementById('course').onchange = function(){
+  setDatepickerEnabledDays();
+};
+$(document).on('change', 'input[name="division"]', setDatepickerEnabledDays);
+    // ========== 아래부터는 기존 로직 그대로(생략/압축 가능), 핵심만 붙이면 동작 ==========
+    function applySelect2ToDuration() {
+      $('#duration').select2({
+        minimumResultsForSearch: Infinity,
+        dropdownParent: $('.form-group.duration'),
+        width: 'style',
+        language: "ko"
+      });
     }
-    
-    (function(factory) {
-      if (typeof define === "function" && define.amd) {
-        define(["jquery", "jquery-ui"], factory);
-      } else {
-        factory(jQuery);
+    $(document).ready(function() {
+      applySelect2ToDuration();
+    });
+    // ==== 과목트리/검색/동적 옵션 ====
+    const courseTree = [
+      {cat:'SAT', items:[
+        {val:'sat_reg', label:'SAT 정규반'},
+        {val:'sat_intense', label:'SAT 직전대비반'},
+        {val:'sat_bridge', label:'SAT 브릿지 유형반'}
+      ]},
+      {cat:'AP', items:[
+        {val:'ap_calbc', label:'Cal BC'},
+        {val:'ap_phyc_m', label:'Phy C-M'},
+        {val:'ap_phy1', label:'Phy1'},
+        {val:'ap_microecon', label:'Micro Econ'},
+        {val:'ap_precal', label:'Pre-cal'},
+        {val:'ap_phy2', label:'Phy2'},
+        {val:'ap_psych', label:'Psychology'},
+        {val:'ap_phyc_em', label:'Phy C-E&M'},
+        {val:'ap_stat', label:'Stat'},
+        {val:'ap_chem', label:'Chem'},
+        {val:'ap_bio', label:'Bio'},
+        {val:'ap_macroecon', label:'Macro Econ'},
+        {val:'ap_calab', label:'Cal AB'},
+        {val:'ap_worldhis', label:'World His'},
+        {val:'ap_comsca', label:'Com.Sc A'},
+        {val:'ap_comscp', label:'Com.Sc P'}
+      ]},
+      {cat:'TOEFL', items:[
+        {val:'toefl_rl', label:'TOEFL R/L'},
+        {val:'toefl_sw', label:'TOEFL S/W'},
+        {val:'toefl_rlsw', label:'TOEFL R/L, S/W'},
+        {val:'toefl_awesome', label:'TOEFL 어썸 실전반'}
+      ]},
+      {cat:'DRW', items:[
+        {val:'drw_l1a', label:'DRW L1A'},
+        {val:'drw_l1b', label:'DRW L1B'},
+        {val:'drw_l2a', label:'DRW L2A'},
+        {val:'drw_l2b', label:'DRW L2B'},
+        {val:'drw_l3', label:'DRW L3'},
+        {val:'drw_americas', label:'DRW 미주&국제반'},
+        {val:'drw_europe', label:'DRW 유럽/남미반'}
+      ]},
+      {cat:'Drill Math', items:[
+        {val:'dm_alg1', label:'Algebra 1'},
+        {val:'dm_alg2', label:'Algebra 2'},
+        {val:'dm_geom', label:'Geometry'},
+        {val:'dm_alg2pre', label:'Algebra2 심화 + Pre-cal'},
+        {val:'dm_igcse', label:'IGCSE Extended Additional Math'}
+      ]}
+    ];
+    function renderCourseTreeMenu() {
+      let html = '<ul>';
+      for (const grp of courseTree) {
+        html += `<li class="maincat">${grp.cat}<ul>`;
+        for (const c of grp.items)
+          html += `<li data-val="${c.val}">${c.label}</li>`;
+        html += `</ul></li>`;
       }
-    }(function($) {
-      $.datepicker.regional['ko'] = {
-        closeText: '닫기',
-        prevText: '이전',
-        nextText: '다음',
-        currentText: '오늘',
-        monthNames: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
-        monthNamesShort: ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
-        dayNames: ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'],
-        dayNamesShort: ['일','월','화','수','목','금','토'],
-        dayNamesMin: ['일','월','화','수','목','금','토'],
-        weekHeader: '주',
-        dateFormat: 'yy-mm-dd',
-        firstDay: 0,
-        isRTL: false,
-        showMonthAfterYear: true,
-        yearSuffix: '년'
-      };
-      $.datepicker.setDefaults($.datepicker.regional['ko']);
-    }));
-    
-    var apTimeOptions = {
-      group1: {
-        courses: ["여름방학 AP Phy1", "여름방학 AP Cal BC", "여름방학 AP Cal AB", "여름방학 AP Pre-cal", "여름방학 AP World History", "여름방학 AP Biology"],
-        options: [
-          { label: "오전 (09:00~11:00)", time: "09:00~11:00" },
-          { label: "오후 (18:20~20:20)", time: "18:20~20:20" }
-        ]
-      },
-      group2: {
-        courses: ["여름방학 AP Phy C-M", "여름방학 AP Macro Econ", "여름방학 AP Micro Econ", "여름방학 AP Psychology", "여름방학 AP Statistics", "여름방학 AP Chemistry", "여름방학 AP Computer.A"],
-        options: [
-          { label: "오전 (11:10~13:10)", time: "11:10~13:10" },
-          { label: "오후 (20:30~22:30)", time: "20:30~22:30" }
-        ]
-      }
-    };
-    
-    var courseData = {
-      "여름방학 Algebra 1 오프라인": { category: "Drill Math", weeklyRate: 250000, time: "14:00~16:00" },
-      "여름방학 Algebra 1 온라인": { category: "Drill Math", weeklyRate: 250000, time: "16:10~18:10(한국시간)" },
-      "여름방학 Algebra 2 오프라인": { category: "Drill Math", weeklyRate: 250000, time: "14:00~16:00" },
-      "여름방학 Algebra 2 온라인": { category: "Drill Math", weeklyRate: 250000, time: "16:10~18:10(한국시간)" },
-      "여름방학 DRW 오전 L1": { category: "DRW", weeklyRate: 330000, time: "10:00~13:00(한국시간)" },
-      "여름방학 DRW 오전 L2": { category: "DRW", weeklyRate: 330000, time: "10:00~13:00(한국시간)" },
-      "여름방학 DRW L1A": { category: "DRW", weeklyRate: 330000, time: "19:00~22:00(한국시간)" },
-      "여름방학 DRW L1B": { category: "DRW", weeklyRate: 330000, time: "20:00~23:00(한국시간)" },
-      "여름방학 DRW L2A": { category: "DRW", weeklyRate: 330000, time: "19:00~22:00(한국시간)" },
-      "여름방학 DRW L2B": { category: "DRW", weeklyRate: 330000, time: "20:00~23:00(한국시간)" },
-      "여름방학 DRW L3":  { category: "DRW", weeklyRate: 330000, time: "20:00~23:00(한국시간)" },
-      "여름방학 W올인원": { category: "W올인원", weeklyRate: 440000, time: "09:00~13:00" },
-      "여름방학 TOEFL L1 오프라인": { category: "TOEFL", weeklyRate: 520000, time: "09:00~13:00" },
-      "여름방학 TOEFL L1 오전 온라인": { category: "TOEFL", weeklyRate: 520000, time: "09:00~13:00(한국시간)" },
-      "여름방학 TOEFL L1 오후 온라인": { category: "TOEFL", weeklyRate: 520000, time: "13:30~17:30(한국시간)" },
-      "여름방학 TOEFL L2 오프라인": { category: "TOEFL", weeklyRate: 520000, time: "09:00~13:00" },
-      "여름방학 TOEFL L2 오전 온라인": { category: "TOEFL", weeklyRate: 520000, time: "09:00~13:00(한국시간)" },
-      "여름방학 TOEFL L2 오후 온라인": { category: "TOEFL", weeklyRate: 520000, time: "13:30~17:30(한국시간)" },
-      "여름방학 SAT 브릿지 오프라인": { category: "SAT", weeklyRate: 950000, time: "09:00~17:00" },
-      "여름방학 SAT 브릿지 온라인": { category: "SAT", weeklyRate: 950000, time: "13:00~21:00(한국시간)" },
-      "여름방학 SAT 1400+ 오프라인": { category: "SAT", weeklyRate: 950000, time: "09:00~17:00" },
-      "여름방학 SAT 1400+ 온라인": { category: "SAT", weeklyRate: 950000, time: "13:00~21:00(한국시간)" },
-      "여름방학 SAT 1500+ 오프라인": { category: "SAT", weeklyRate: 950000, time: "09:00~17:00" },
-      "여름방학 SAT 1500+ 온라인": { category: "SAT", weeklyRate: 950000, time: "13:00~21:00(한국시간)" },
-      "여름방학 SAT 미주반": { category: "SAT미주/유럽", weeklyRate: 560000, time: "10:00~14:00(한국시간)" },
-      "여름방학 SAT 유럽반": { category: "SAT미주/유럽", weeklyRate: 560000, time: "17:00~21:00(한국시간)" },
-      "여름방학 AP Phy1":         { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP Cal BC":        { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP Cal AB":        { category: "AP", threeWeekRate: 1380000, time: "시간 미정" },
-      "여름방학 AP Pre-cal":       { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP World History": { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP Biology":       { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP Phy C-M":       { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP Macro Econ":    { category: "AP", threeWeekRate: 1035000, time: "시간 미정" },
-      "여름방학 AP Micro Econ":    { category: "AP", threeWeekRate: 1035000, time: "시간 미정" },
-      "여름방학 AP Psychology":    { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP Statistics":    { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP Chemistry":     { category: "AP", threeWeekRate: 1725000, time: "시간 미정" },
-      "여름방학 AP Computer.A":    { category: "AP", threeWeekRate: 1725000, time: "시간 미정" }
-    };
-    
-    function isDateAllowed(date) {
-      if (date.getFullYear() === 2025 && date.getMonth() === 5 &&
-          date.getDate() >= 1 && date.getDate() <= 15) {
-        return false;
-      }
-      var course = $("#course").val();
-      var courseInfo = courseData[course];
-      var courseCategory = courseInfo ? courseInfo.category : "";
-      if (courseCategory === "AP") {
-        if (date.getFullYear() === 2025 && date.getMonth() === 6 &&
-            (date.getDate() === 7 || date.getDate() === 8)) {
-          return false;
+      html += '</ul>';
+      $('#courseTreeMenu').html(html);
+      let sel = $('#course'); sel.empty();
+      for (const grp of courseTree) {
+        let optg = $(`<optgroup label="${grp.cat}"></optgroup>`);
+        for (const c of grp.items) {
+          optg.append(`<option value="${c.val}">${c.label}</option>`);
         }
+        sel.append(optg);
       }
-      if ((courseCategory === "DRW" || courseCategory === "Drill Math" ||
-           courseCategory === "W올인원") &&
-          date.getFullYear() === 2025 && date.getMonth() === 5 &&
-          date.getDate() === 16) {
-        return false;
-      }
-      var allowedDay = (course === "여름방학 AP Micro Econ") ? 2 : 1;
-      return date.getDay() === allowedDay;
     }
-    
-    $(function() {
-      $("#course").select2({
-        placeholder: "수강과목을 선택하세요",
-        allowClear: true
+    renderCourseTreeMenu();
+    $('#courseSelectorBtn').on('click', function(e){
+      $('#courseSearchBox').val('');
+      $('#courseTreeMenu > ul > li').show().find('ul li').show();
+      $('#courseTreeMenu > ul > li').find('ul').hide();
+      $('#courseTreeMenu ul > li.maincat:first-child ul').show();
+      $('#courseTreeMenuWrap').toggle();
+      $(document).on('mousedown.coursemenu', function(evt){
+        if (!$(evt.target).closest('#courseTreeMenuWrap,#courseSelectorBtn').length)
+          $('#courseTreeMenuWrap').hide();
       });
-      
-      $("#startDate").datepicker({
-        dateFormat: "yy-mm-dd",
-        minDate: new Date(2025, 5, 16),
-        maxDate: new Date(2025, 7, 31),
-        beforeShowDay: function(date) {
-          if (date.getFullYear() === 2025 && date.getMonth() === 5 &&
-              date.getDate() >= 1 && date.getDate() <= 15) {
-            return [false, "", "Unavailable"];
-          }
-          var allowed = isDateAllowed(date);
-          return [allowed, "", allowed ? "Available" : "Not allowed"];
-        }
-      });
-      
-      $("#course").on("change", function() {
-        var selectedDateStr = $("#startDate").val();
-        if (selectedDateStr) {
-          try {
-            var selectedDate = $.datepicker.parseDate("yy-mm-dd", selectedDateStr);
-            if (!isDateAllowed(selectedDate)) {
-              $("#startDate").val("");
-            }
-          } catch(e) {
-            $("#startDate").val("");
-          }
-        }
-        $("#startDate").datepicker("refresh");
-        updateAPTimeOptions();
-      });
-      
-      $(document).keydown(function(e) {
-        if(e.altKey && e.which === 81) {
-          e.preventDefault();
-          calculateTuition();
-        } else if(e.altKey && e.which === 82) {
-          e.preventDefault();
-          copyReservationInfo();
+    });
+    $('#courseTreeMenu').on('click', 'li.maincat', function(e){
+      $(this).find('ul').slideToggle(120);
+      $(this).siblings().find('ul').slideUp(100);
+      e.stopPropagation();
+    });
+    $('#courseTreeMenu').on('click', 'ul li[data-val]', function(e){
+      let courseVal = $(this).data('val');
+      let courseLabel = $(this).text();
+      $('#courseSelectorBtn').val(courseLabel);
+      $('#selectedCourseLabel').text('');
+      $('#courseSelectorBtn').data('courseval', courseVal);
+      $('#courseTreeMenuWrap').hide();
+      $('#course').val(courseVal).trigger('change');
+      e.stopPropagation();
+    });
+    $('#courseTreeMenu ul > li.maincat:first-child ul').show();
+    $('#courseSearchBox').on('input', function(){
+      let kw = $(this).val().toLowerCase().trim();
+      $('#courseTreeMenu > ul > li').each(function(){
+        let matched = false;
+        $(this).find('ul li').each(function(){
+          if (!kw || $(this).text().toLowerCase().includes(kw)) {
+            $(this).show();
+            matched = true;
+          } else $(this).hide();
+        });
+        if (matched) {
+          $(this).show();
+          $(this).find('ul').show();
+        } else {
+          $(this).hide();
+          $(this).find('ul').hide();
         }
       });
     });
-    
-    function formatDateWithDay(date) {
-      var month = date.getMonth() + 1;
-      var day = date.getDate();
-      var days = ["일", "월", "화", "수", "목", "금", "토"];
-      return month + ". " + day + "(" + days[date.getDay()] + ")";
-    }
-    
-    function updateAPTimeOptions() {
-      var course = $("#course").val();
-      var container = $("#apTimeContainer");
-      container.empty();
-      if (!courseData[course] || courseData[course].category !== "AP") {
-        container.hide();
+
+    // ---- 옵션 및 시간 자동 출력 ---- (수정버전)
+    document.getElementById('course').onchange = function() {
+      setDatepickerEnabledDays();
+
+      let v = this.value;
+      let box = document.getElementById('extraOptions');
+      box.innerHTML = '';
+
+      // 항상 duration 드롭다운부터 리셋!
+      try { $('#duration').select2('destroy'); } catch(e){}
+      $('#duration').empty();
+
+      if (!v || !courseInfo[v]) {
+        applySelect2ToDuration();
         return;
       }
-      var group = null;
-      if (apTimeOptions.group1.courses.indexOf(course) !== -1) {
-        group = apTimeOptions.group1;
-      } else if (apTimeOptions.group2.courses.indexOf(course) !== -1) {
-        group = apTimeOptions.group2;
-      }
-      if (group) {
-        container.show();
-        container.append("<p>AP 시간 선택:</p>");
-        for (var i = 0; i < group.options.length; i++) {
-          var opt = group.options[i];
-          var radioId = "apTimeOption" + i;
-          var radio = '<label for="' + radioId + '" style="margin-right:15px;"><input type="radio" name="apTimeOption" id="' + radioId + '" value="' + opt.time + '"';
-          if (i === 0) radio += ' checked';
-          radio += '> ' + opt.label + '</label>';
-          container.append(radio);
-        }
+      let c = courseInfo[v];
+      let unit = (c.durationType==='day') ? '일' : (c.durationType==='set') ? 'set' : '주';
+      document.getElementById('durationLabel').textContent = `수강 기간${unit==='set'?'(set)':''}`;
+
+      if (v === 'sat_intense') {
+        $('#duration').append(`<option value="0">-</option>`);
+        applySelect2ToDuration();
+        let html = '<div class="option-group">';
+        html += '<div class="option-row"><b>시간대:</b>';
+        html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
+        html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
+        html += '</div>';
+        html += '<div class="option-row"><b>RW 수강 횟수:</b>';
+        html += `<select id="rwCount">`;
+        for(let i=0;i<=4;i++) html += `<option value="${i}">${i}회</option>`;
+        html += `</select></div>`;
+        html += '<div class="option-row"><b>Math 수강 횟수:</b>';
+        html += `<select id="mathCount">`;
+        for(let i=0;i<=2;i++) html += `<option value="${i}">${i}회</option>`;
+        html += `</select></div>`;
+        html += '<div style="color:#c44;font-size:15px;margin-top:8px;">※ RW, Math 둘 중 하나 이상은 1회 이상 선택</div>';
+        html += '</div>';
+        box.innerHTML = html;
       } else {
-        container.hide();
+        for(let i=c.min; i<=c.max; ++i) {
+          let label = (unit==='set') ? `${i}set` : `${i}${unit}`;
+          $('#duration').append(`<option value="${i}">${label}</option>`);
+        }
+        applySelect2ToDuration();
+        if (v === 'sat_reg') {
+          let html = '<div class="option-group">';
+          html += '<div class="option-row"><b>분반:</b>';
+          html += `<label><input type="radio" name="division" value="평일" checked> 평일</label>`;
+          html += `<label><input type="radio" name="division" value="주말"> 주말</label>`;
+          html += '</div><div class="option-row"><b>시간대:</b>';
+          html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
+          html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
+          html += '</div><div class="option-row"><b>과목:</b>';
+          html += `<label><input type="checkbox" name="part" value="RW" checked> RW</label>`;
+          html += `<label><input type="checkbox" name="part" value="Math"> Math</label>`;
+          html += '</div></div>';
+          box.innerHTML = html;
+        } else if (v === 'sat_bridge') {
+          let html = '<div class="option-group">';
+          html += '<div class="option-row"><b>분반:</b>';
+          html += `<label><input type="radio" name="division" value="평일" checked> 평일</label>`;
+          html += `<label><input type="radio" name="division" value="주말"> 주말</label>`;
+          html += '</div><div class="option-row"><b>시간대:</b>';
+          html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
+          html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
+          html += '</div></div>';
+          box.innerHTML = html;
+        } else if (
+          ['ap_calbc','ap_phy1','ap_stat','ap_chem','ap_bio'].includes(v)
+        ) {
+          let html = '<div class="option-group">';
+          html += '<div class="option-row"><b>시간대:</b>';
+          html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
+          html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
+          html += '</div></div>';
+          box.innerHTML = html;
+        }
       }
+    };
+
+// ==== 과목/기간/수강료 데이터 (fee 단위: 원) ====
+const courseInfo = {
+  sat_reg:      {name:"SAT 정규반", min:1, max:4, durationType:"week", fee:{평일:200000, 주말:200000}},
+  sat_intense:  {name:"SAT 직전대비반", min:1, max:4, durationType:"day", fee:{1:150000,2:260000,3:330000,4:400000}},
+  sat_bridge:   {name:"SAT 브릿지 유형반", min:1, max:14, durationType:"week", fee:120000},
+  ap_calbc:     {name:"Cal BC", min:1, max:13, durationType:"week", fee:115000},
+  ap_phyc_m:    {name:"Phy C-M", min:1, max:13, durationType:"week", fee:115000},
+  ap_phy1:      {name:"Phy1", min:1, max:13, durationType:"week", fee:115000},
+  ap_microecon: {name:"Micro Econ", min:1, max:13, durationType:"week", fee:115000},
+  ap_precal:    {name:"Pre-cal", min:1, max:13, durationType:"week", fee:115000},
+  ap_phy2:      {name:"Phy2", min:1, max:13, durationType:"week", fee:115000},
+  ap_psych:     {name:"Psychology", min:1, max:13, durationType:"week", fee:115000},
+  ap_phyc_em:   {name:"Phy C-E&M", min:1, max:13, durationType:"week", fee:115000},
+  ap_stat:      {name:"Stat", min:1, max:13, durationType:"week", fee:115000},
+  ap_chem:      {name:"Chem", min:1, max:13, durationType:"week", fee:115000},
+  ap_bio:       {name:"Bio", min:1, max:13, durationType:"week", fee:115000},
+  ap_macroecon: {name:"Macro Econ", min:1, max:13, durationType:"week", fee:115000},
+  ap_calab:     {name:"Cal AB", min:1, max:13, durationType:"week", fee:115000},
+  ap_worldhis:  {name:"World His", min:1, max:13, durationType:"week", fee:115000},
+  ap_comsca:    {name:"Com.Sc A", min:1, max:13, durationType:"week", fee:115000},
+  ap_comscp:    {name:"Com.Sc P", min:1, max:13, durationType:"week", fee:115000},
+  toefl_rl:     {name:"TOEFL R/L", min:1, max:12, durationType:"week", fee:150000},
+  toefl_sw:     {name:"TOEFL S/W", min:1, max:12, durationType:"week", fee:150000},
+  toefl_rlsw:   {name:"TOEFL R/L, S/W", min:1, max:12, durationType:"week", fee:300000},
+  toefl_awesome:{name:"TOEFL 어썸 실전반", min:1, max:4, durationType:"set", fee:190000},
+  drw_l1a:      {name:"DRW L1A", min:1, max:12, durationType:"week", fee:162000},
+  drw_l1b:      {name:"DRW L1B", min:1, max:12, durationType:"week", fee:162000},
+  drw_l2a:      {name:"DRW L2A", min:1, max:12, durationType:"week", fee:162000},
+  drw_l2b:      {name:"DRW L2B", min:1, max:12, durationType:"week", fee:162000},
+  drw_l3:       {name:"DRW L3", min:1, max:12, durationType:"week", fee:162000},
+  drw_americas: {name:"DRW 미주&국제반", min:1, max:12, durationType:"week", fee:162000},
+  drw_europe:   {name:"DRW 유럽/남미반", min:1, max:12, durationType:"week", fee:162000},
+  dm_alg1:      {name:"Algebra 1", min:1, max:12, durationType:"week", fee:80000},
+  dm_alg2:      {name:"Algebra 2", min:1, max:12, durationType:"week", fee:80000},
+  dm_geom:      {name:"Geometry", min:1, max:12, durationType:"week", fee:80000},
+  dm_alg2pre:   {name:"Algebra2 심화 + Pre-cal", min:1, max:12, durationType:"week", fee:80000},
+  dm_igcse:     {name:"IGCSE Extended Additional Math", min:1, max:12, durationType:"week", fee:80000}
+};
+
+const timeTable = {
+  "SAT 정규반": {
+    "평일": {
+      "오전": { "RW": "10:00~12:00", "Math": "12:00~13:30" },
+      "저녁": { "RW": "20:00~22:00", "Math": "22:00~23:30" }
+    },
+    "주말": {
+      "오전": { "RW": "10:00~12:00", "Math": "12:00~13:30" },
+      "저녁": { "RW": "20:00~22:00", "Math": "22:00~23:30" }
     }
-    
-    function calculateTuition() {
-      var name = document.getElementById("studentName").value;
-      var course = document.getElementById("course").value;
-      var startDateStr = document.getElementById("startDate").value;
-      var weeks = parseInt(document.getElementById("duration").value);
-      var discountRate = parseFloat(document.getElementById("discount").value);
-      
-      if (!startDateStr) {
-        showToast("수강 시작일을 선택해주세요.");
-        return;
-      }
-      
-      var startDate = new Date(startDateStr);
-      var sDay = startDate.getDay();
-      var firstFriday = new Date(startDate);
-      if (sDay <= 5) {
-        firstFriday.setDate(startDate.getDate() + (5 - sDay));
-      } else {
-        firstFriday.setDate(startDate.getDate() + (12 - sDay));
-      }
-      var endDate = new Date(firstFriday);
-      endDate.setDate(firstFriday.getDate() + (weeks - 1) * 7);
-      if (course === "여름방학 AP Micro Econ") {
-        endDate.setDate(endDate.getDate() + 1);
-      }
-      
-      var courseInfo = courseData[course];
-      if (!courseInfo) {
-        showToast("선택한 과목에 대한 정보가 없습니다.");
-        return;
-      }
-      
-      var totalFee = 0;
-      if (courseInfo.category === "AP") {
-        if (weeks > 3) {
-          alert("AP 과정은 최대 3주까지만 수강 가능합니다.");
-          return;
-        }
-        totalFee = (weeks === 3) ? courseInfo.threeWeekRate : Math.round(courseInfo.threeWeekRate / 3 * weeks);
-      } else {
-        totalFee = courseInfo.weeklyRate * weeks;
-      }
-      
-      var finalFee = Math.round(totalFee * (1 - discountRate));
-      
-      var selectedAPTime = "";
-      if (courseData[course].category === "AP") {
-        var apTimeRadio = document.querySelector('input[name="apTimeOption"]:checked');
-        if (apTimeRadio) {
-          selectedAPTime = apTimeRadio.value;
-        }
-      }
-      
-      document.getElementById("infoName").textContent = name;
-      document.getElementById("infoCourse").textContent = course;
-      document.getElementById("infoPeriod").textContent =
-        formatDateWithDay(startDate) + " ~ " + formatDateWithDay(endDate) + " (" + weeks + "주)";
-      document.getElementById("infoTime").textContent = (selectedAPTime !== "") ? selectedAPTime : courseInfo.time;
-      document.getElementById("infoFee").textContent = finalFee.toLocaleString() + "원 (" + (discountRate * 100) + "% 할인)";
+  },
+  "SAT 직전대비반": {
+    "오전": { "RW": "10:00~12:00", "Math": "12:00~13:30" },
+    "저녁": { "RW": "20:00~22:00", "Math": "22:00~23:30" }
+  },
+  "SAT 브릿지 유형반": {
+    "평일": { "오전": "10:00~12:00", "저녁": "20:00~22:00" },
+    "주말": { "오전": "10:00~12:00", "저녁": "20:00~22:00" }
+  },
+  "Cal BC": { "오전": "09:00~11:00", "저녁": "18:10~20:10" },
+  "Phy1": { "오전": "11:10~13:10", "저녁": "18:10~20:10" },
+  "Stat": { "오전": "09:00~11:00", "저녁": "18:10~20:10" },
+  "Chem": { "오전": "09:00~11:00", "저녁": "18:10~20:10" },
+  "Bio": { "오전": "11:10~13:10", "저녁": "20:20~22:20" },
+  "Phy C-M": "09:00~11:00",
+  "Micro Econ": "11:10~13:10",
+  "Pre-cal": "16:00~18:00",
+  "Phy2": "16:00~18:00",
+  "Psychology": "16:00~18:00",
+  "Phy C-E&M": "20:20~22:20",
+  "Macro Econ": "11:10~13:10",
+  "Cal AB": "16:00~18:00",
+  "World His": "16:00~18:00",
+  "Com.Sc A": "16:00~18:00",
+  "Com.Sc P": "18:10~20:10",
+  "TOEFL R/L": "15:00~19:00",
+  "TOEFL S/W": "15:00~19:00",
+  "TOEFL R/L, S/W": "15:00~19:00",
+  "TOEFL 어썸 실전반": "11:00~14:00",
+  "DRW L1A": "20:00~22:00",
+  "DRW L1B": "20:00~22:00",
+  "DRW L2A": "20:00~22:00",
+  "DRW L2B": "20:00~22:00",
+  "DRW L3": "20:00~23:00",
+  "DRW 미주&국제반": "10:00~12:00",
+  "DRW 유럽/남미반": "20:00~23:00",
+  "Algebra 1": "11:10~13:10",
+  "Algebra 2": "11:10~13:10",
+  "Geometry": "11:10~13:10",
+  "Algebra2 심화 + Pre-cal": "11:10~13:10",
+  "IGCSE Extended Additional Math": "20:10~22:10"
+};
+
+// ---- 옵션 및 시간 자동 출력 ----
+document.getElementById('course').onchange = function() {
+  let v = this.value;
+  let box = document.getElementById('extraOptions');
+  box.innerHTML = '';
+  $('#duration').empty().select2('destroy');
+  if (!v || !courseInfo[v]) { applySelect2ToDuration(); return; }
+  let c = courseInfo[v];
+  let unit = (c.durationType==='day') ? '일' : (c.durationType==='set') ? 'set' : '주';
+  document.getElementById('durationLabel').textContent = `수강 기간${unit==='set'?'(set)':''}`;
+
+  if (v === 'sat_intense') {
+    // SAT 직전대비반: 기간 select 숨김, 개별 횟수 select 노출
+    $('#duration').append(`<option value="0">-</option>`);
+    applySelect2ToDuration();
+    let html = '<div class="option-group">';
+    html += '<div class="option-row"><b>시간대:</b>';
+    html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
+    html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
+    html += '</div>';
+    html += '<div class="option-row"><b>RW 수강 횟수:</b>';
+    html += `<select id="rwCount">`;
+    for(let i=0;i<=4;i++) html += `<option value="${i}">${i}회</option>`;
+    html += `</select></div>`;
+    html += '<div class="option-row"><b>Math 수강 횟수:</b>';
+    html += `<select id="mathCount">`;
+    for(let i=0;i<=2;i++) html += `<option value="${i}">${i}회</option>`;
+    html += `</select></div>`;
+    html += '<div style="color:#c44;font-size:15px;margin-top:8px;">※ RW, Math 둘 중 하나 이상은 1회 이상 선택</div>';
+    html += '</div>';
+    box.innerHTML = html;
+  } else {
+    for(let i=c.min; i<=c.max; ++i) {
+      let label = (unit==='set') ? `${i}set` : `${i}${unit}`;
+      $('#duration').append(`<option value="${i}">${label}</option>`);
     }
-    
-    function copyReservationInfo() {
-      var name = document.getElementById("infoName").innerText;
-      var course = document.getElementById("infoCourse").innerText;
-      var period = document.getElementById("infoPeriod").innerText;
-      var time = document.getElementById("infoTime").innerText;
-      var fee = document.getElementById("infoFee").innerText;
-      
-      // 교재비 계산: W올인원은 수강기간(주) 매핑, TOEFL은 온라인/오프라인 구분
-      var textbookFee = "";
-      if (course.indexOf("W올인원") !== -1) {
-        var duration = parseInt(document.getElementById("duration").value);
-        var feeMapping = {1:"40,000원", 2:"50,000원", 3:"60,000원", 4:"70,000원", 5:"80,000원", 6:"90,000원"};
-        textbookFee = feeMapping[duration] || "";
-      } else if (course.indexOf("TOEFL") !== -1) {
-        if (course.indexOf("온라인") !== -1) {
-          textbookFee = "30,000원";
-        } else {
-          textbookFee = "60,000원";
-        }
-      }
-      
-      var infoText = "감사합니다. 수강 예약 안내드립니다.\n\n" +
-                     "▶학생이름: " + name + "\n" +
-                     "▶수강과목: " + course + "\n" +
-                     "▶수강기간: " + period + "\n" +
-                     "▶수업시간: " + time + "\n" +
-                     "▶수강료: " + fee + "\n";
-      if (textbookFee !== "") {
-        infoText += "▶교재비: " + textbookFee + "\n\n";
-      } else {
-        infoText += "\n";
-      }
-      
-      infoText += "※ 계좌이체는 학생이름으로 입금 부탁드리며, 현금영수증 필요 시 발급받으실 휴대폰/사업자 번호를 알려주시기 바랍니다.\n\n" +
-                  "[수강료 입금 계좌]\n신한은행 140-009-205058\n(예금주: 세한아카데미외국어학원)\n\n";
-      
-      if (textbookFee !== "") {
-        infoText += "[교재비 입금 계좌]\n신한은행 110-378-431090\n(예금주: 김철영 세한어학연구소)";
-      }
-      
-      navigator.clipboard.writeText(infoText).then(function() {
-        showToast("예약 안내가 복사되었습니다.");
-      }, function(err) {
-        showToast("복사에 실패했습니다: " + err);
-      });
+    applySelect2ToDuration();
+    if (v === 'sat_reg') {
+      let html = '<div class="option-group">';
+      html += '<div class="option-row"><b>분반:</b>';
+      html += `<label><input type="radio" name="division" value="평일" checked> 평일</label>`;
+      html += `<label><input type="radio" name="division" value="주말"> 주말</label>`;
+      html += '</div><div class="option-row"><b>시간대:</b>';
+      html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
+      html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
+      html += '</div><div class="option-row"><b>과목:</b>';
+      html += `<label><input type="checkbox" name="part" value="RW" checked> RW</label>`;
+      html += `<label><input type="checkbox" name="part" value="Math"> Math</label>`;
+      html += '</div></div>';
+      box.innerHTML = html;
+    } else if (v === 'sat_bridge') {
+      let html = '<div class="option-group">';
+      html += '<div class="option-row"><b>분반:</b>';
+      html += `<label><input type="radio" name="division" value="평일" checked> 평일</label>`;
+      html += `<label><input type="radio" name="division" value="주말"> 주말</label>`;
+      html += '</div><div class="option-row"><b>시간대:</b>';
+      html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
+      html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
+      html += '</div></div>';
+      box.innerHTML = html;
+    } else if (
+      ['ap_calbc','ap_phy1','ap_stat','ap_chem','ap_bio'].includes(v)
+    ) {
+      let html = '<div class="option-group">';
+      html += '<div class="option-row"><b>시간대:</b>';
+      html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
+      html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
+      html += '</div></div>';
+      box.innerHTML = html;
     }
-  </script>
+  }
+  setDatepickerEnabledDays();
+};
+
+// ---- 계산 함수 (SAT 직전대비반 옵션 반영) ----
+function calculateTuition() {
+  let studentName = document.getElementById('studentName').value.trim();
+  let courseKey = document.getElementById('course').value;
+  let c = courseInfo[courseKey];
+  let startDate = document.getElementById('startDate').value;
+  if (!studentName) return showToast('이름을 입력하세요.');
+  if (!courseKey || !c) return showToast('과목을 선택하세요.');
+  if (!startDate) return showToast('수강 시작일을 입력하세요.');
+  let period = +document.getElementById('duration').value;
+  let discount = parseFloat(document.getElementById('discount').value);
+
+  let division = document.querySelector('input[name="division"]:checked')?.value;
+  let timeSlot = document.querySelector('input[name="timeSlot"]:checked')?.value;
+  let parts = Array.from(document.querySelectorAll('input[name="part"]:checked')).map(x=>x.value);
+
+  let displayCourseName = c.name;
+  let durationStr = '';
+  let timeStr = "";
+  let totalFee = 0;
+
+  if (courseKey === "sat_intense") {
+    let rwCount = Number(document.getElementById('rwCount')?.value || 0);
+    let mathCount = Number(document.getElementById('mathCount')?.value || 0);
+    if (rwCount === 0 && mathCount === 0) return showToast('RW, Math 중 최소 1개 이상 선택하세요.');
+    let rwTable = {1:150000,2:260000,3:330000,4:400000};
+    let mathTable = {1:70000,2:140000};
+    let sum = 0;
+    if (rwCount>0) sum += rwTable[rwCount] ?? 0;
+    if (mathCount>0) sum += mathTable[mathCount] ?? 0;
+    totalFee = sum;
+
+    // [수강과목] 표기
+    let partsLabel = [];
+    if (rwCount>0) partsLabel.push("RW");
+    if (mathCount>0) partsLabel.push("Math");
+    let partsText = partsLabel.length===2 ? "RW&Math" : (partsLabel[0] || "");
+    displayCourseName = `${c.name} ${timeSlot||""}반 ${partsText}`.replace(/\s+/g, " ").trim();
+
+    // [수강기간] "일" 단위!
+    let maxDay = Math.max(rwCount, mathCount);
+    if (maxDay>0) {
+      let start = new Date(startDate);
+      let end = new Date(startDate);
+      end.setDate(start.getDate() + maxDay - 1);
+      let sm = start.getMonth()+1, sd = start.getDate(), sw = weekdayName[start.getDay()];
+      let em = end.getMonth()+1, ed = end.getDate(), ew = weekdayName[end.getDay()];
+      durationStr = `${sm}.${sd}(${sw})~${em}.${ed}(${ew}) (${maxDay}일)`;
+    } else {
+      durationStr = '-';
+    }
+
+    // [수업시간]
+    let t = timeTable["SAT 직전대비반"][timeSlot||"오전"];
+    let times = [];
+    if (rwCount>0) times.push(`RW: ${t["RW"]}`);
+    if (mathCount>0) times.push(`Math: ${t["Math"]}`);
+    timeStr = times.join(' ') + " (한국시간 기준)";
+  } else if (["sat_reg", "sat_bridge"].includes(courseKey)) {
+    let divisionKor = division || "";
+    let timeSlotKor = timeSlot || "";
+    let partKor = (parts.length === 2) ? "RW&Math" : (parts[0] || "");
+    displayCourseName = `${c.name} ${divisionKor} ${timeSlotKor}반 ${partKor}`.replace(/\s+/g, " ").trim();
+    durationStr = formatCourseDateRange(startDate, period, courseKey, {division})?.label || '';
+    // 시간
+    if (c.name === "SAT 정규반") {
+      if (!division) division = "평일";
+      if (!timeSlot) timeSlot = "오전";
+      if (parts.length === 0) parts = ["RW"];
+      let t = timeTable["SAT 정규반"][division][timeSlot];
+      timeStr = parts.map(p => `${p}: ${t[p]}`).join('\n') + " (한국시간 기준)";
+    } else if (c.name === "SAT 브릿지 유형반") {
+      if (!division) division = "평일";
+      if (!timeSlot) timeSlot = "오전";
+      let t = timeTable["SAT 브릿지 유형반"][division][timeSlot];
+      timeStr = `${t} (한국시간 기준)`;
+    }
+    // 수강료
+    if (courseKey === 'sat_bridge') {
+      // 분반 무관하게 주당 120,000원
+      totalFee = 120000 * period;
+    }
+if (typeof c.fee === 'object' && (c.name === "SAT 정규반")) {
+  // SAT 정규반 요금: RW만/Math만/둘 다
+  if (parts.length === 1 && parts[0] === "Math") {
+    totalFee = 70000 * period;
+  } else if (parts.length === 1 && parts[0] === "RW") {
+    totalFee = 200000 * period;
+  } else if (parts.length === 2 && parts.includes("RW") && parts.includes("Math")) {
+    totalFee = 270000 * period;
+  } else {
+    totalFee = 0;
+  }
+}
+  } else {
+    let apSubjects = [
+      "Cal BC","Phy C-M","Phy1","Micro Econ","Pre-cal","Phy2","Psychology","Phy C-E&M",
+      "Stat","Chem","Bio","Macro Econ","Cal AB","World His","Com.Sc A","Com.Sc P"
+    ];
+    if (apSubjects.includes(c.name)) displayCourseName = "AP " + c.name;
+    if (courseKey === 'toefl_awesome') {
+      let start = new Date(startDate);
+      let day = start.getDay();
+      if(day !== 6) start.setDate(start.getDate() + ((6 - day + 7) % 7));
+      let sets = period;
+      let weekGroups = [];
+      for(let i=0; i<sets; i++) {
+        let sat = new Date(start);
+        sat.setDate(start.getDate() + 7*i);
+        let sun = new Date(sat);
+        sun.setDate(sat.getDate()+1);
+        weekGroups.push(`${sat.getMonth()+1}.${sat.getDate()},${sun.getMonth()+1}.${sun.getDate()}`);
+      }
+      durationStr = weekGroups.join(' / ');
+      displayCourseName = c.name + ' ' + sets + 'set';
+    } else if (c.durationType === "set") {
+      durationStr = `${period}set`;
+    } else {
+      durationStr = formatCourseDateRange(startDate, period, courseKey, {division})?.label || '';
+    }
+    // 시간
+    if (["Cal BC","Phy1","Stat","Chem","Bio"].includes(c.name)) {
+      if (!timeSlot) timeSlot = "오전";
+      let t = timeTable[c.name][timeSlot];
+      timeStr = `${t} (한국시간 기준)`;
+    } else if (timeTable[c.name]) {
+      timeStr = `${timeTable[c.name]} (한국시간 기준)`;
+    } else {
+      timeStr = '';
+    }
+    // 수강료
+    if (typeof c.fee === 'number') {
+      totalFee = c.fee * period;
+    }
+  }
+
+  let discountedFee = Math.round(totalFee * (1-discount));
+  let feeStr = discountedFee.toLocaleString() + "원";
+  if (discount > 0) {
+    feeStr += ` (${Math.round(discount*100)}% 할인)`;
+  }
+
+  document.getElementById('infoName').textContent = studentName;
+  document.getElementById('infoCourse').textContent = displayCourseName;
+  document.getElementById('infoStart').textContent = durationStr;
+  document.getElementById('infoTime').textContent = timeStr;
+  document.getElementById('infoFee').textContent = feeStr;
+  document.getElementById('reservationInfo').style.display = '';
+  document.getElementById('copyButton').style.display = '';
+}
+
+function showToast(msg) {
+  var t = document.getElementById("toast");
+  t.textContent = msg; t.style.visibility = "visible"; t.style.opacity = 1;
+  setTimeout(()=>{ t.style.opacity = 0; setTimeout(()=>{t.style.visibility='hidden';},500)},2000);
+}
+function copyReservationInfo() {
+  let name = document.getElementById('infoName').textContent;
+  let course = document.getElementById('infoCourse').textContent;
+  let period = document.getElementById('infoStart').textContent;
+  let time = document.getElementById('infoTime').textContent;
+  let fee = document.getElementById('infoFee').textContent;
+  let infoText = `감사합니다. 수강 예약 안내드립니다.\n\n`
+      + `▶학생이름: ${name}\n`
+      + `▶수강과목: ${course}\n`
+      + `▶수강기간: ${period}\n`
+      + `▶수업시간: ${time}\n`
+      + `▶수강료: ${fee}\n\n`
+      + `※ 계좌이체는 학생이름으로 입금 부탁드리며, 현금영수증 필요 시 발급받으실 휴대폰/사업자 번호를 알려주시기 바랍니다.\n`
+      + `[수강료 입금 계좌]\n신한은행 140-009-205058\n(예금주: 세한아카데미외국어학원)\n`;
+  navigator.clipboard.writeText(infoText)
+    .then(()=> showToast('예약 안내가 복사되었습니다.'))
+    .catch(()=> showToast('복사 실패!'));
+}
+
+// 파일의 <script> 구역 가장 아래쪽에 추가!
+function formatCourseDateRange(startDate, period, courseKey, opts = {}) {
+  if (!startDate || isNaN(period)) return { label: "" };
+  let start = new Date(startDate);
+  if (isNaN(start)) return { label: "" };
+  let end = new Date(start);
+
+  // SAT 정규반 (평일/주말 구분)
+  if (courseKey === 'sat_reg') {
+    if (opts.division === '주말') {
+      // 주말반은 항상 일요일
+      end.setDate(start.getDate() + (period - 1) * 7);
+      end.setDate(end.getDate() + (7 - end.getDay()) % 7); // 0: 일요일
+    } else {
+      // 평일반은 원하는 요일로! (여기서는 토요일로 예시)
+      const targetDay = 4; // 토요일(6), 금요일(5), 등 변경 가능
+      end.setDate(start.getDate() + (period - 1) * 7);
+      end.setDate(end.getDate() + ((targetDay - end.getDay() + 7) % 7));
+    }
+  }
+  // SAT 브릿지 유형반 - 주말/평일 분기
+  else if (courseKey === 'sat_bridge') {
+    end.setDate(start.getDate() + (period - 1) * 7);
+    // 주말반: 일요일, 평일반: 목요일
+    if (opts.division === '주말') {
+      end.setDate(end.getDate() + (7 - end.getDay()) % 7); // 0: 일요일
+    } else {
+      end.setDate(end.getDate() + ((4 - end.getDay() + 7) % 7)); // 4: 목요일
+    }
+  }
+  // TOEFL R/L, S/W, R/L+S/W → 무조건 일요일
+  else if (["toefl_rl", "toefl_sw", "toefl_rlsw"].includes(courseKey)) {
+    end.setDate(start.getDate() + (period - 1) * 7);
+    end.setDate(end.getDate() + (7 - end.getDay()) % 7);
+  }
+  // DRW L1A, L2A, 미주&국제반: 금요일(5)
+  else if (["drw_l1a", "drw_l2a", "drw_americas"].includes(courseKey)) {
+    end.setDate(start.getDate() + (period - 1) * 7);
+    end.setDate(end.getDate() + ((5 - end.getDay() + 7) % 7)); // 5: 금요일
+  }
+  // DRW L1B, L2B, L3, 유럽/남미반: 토요일(6)
+  else if (["drw_l1b", "drw_l2b", "drw_l3", "drw_europe"].includes(courseKey)) {
+    end.setDate(start.getDate() + (period - 1) * 7);
+    end.setDate(end.getDate() + ((6 - end.getDay() + 7) % 7)); // 6: 토요일
+  }
+  // 나머지(기존 방식)
+  else {
+    end.setDate(start.getDate() + (period - 1) * 7);
+  }
+
+  // 날짜 포맷팅 (기존과 동일)
+  const weekdayName = ['일', '월', '화', '수', '목', '금', '토'];
+  let sm = start.getMonth() + 1, sd = start.getDate(), sw = weekdayName[start.getDay()];
+  let em = end.getMonth() + 1, ed = end.getDate(), ew = weekdayName[end.getDay()];
+  let label = `${sm}.${sd}(${sw}) ~ ${em}.${ed}(${ew}) (${period}주)`;
+  return { label };
+}
+</script>
 </body>
 </html>
