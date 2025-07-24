@@ -8,51 +8,66 @@
   <style>
     body { font-family: 'Noto Sans KR', Arial, sans-serif; background: #f9f9f9; margin: 40px; font-size: 18px;}
     form { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; max-width: 700px; }
-    .form-group { margin-bottom: 28px; position:relative; }
+    #patchBox { position: fixed; top: 80px; right: 80px; z-index: 1050; }
+    #patchBtn {
+      background: #fae100;
+      color: #333;
+      border-radius: 12px;
+      font-weight: bold;
+      padding: 11px 28px;
+      border: none;
+      font-size: 18px;
+      box-shadow: 0 2px 8px #e0e0e0;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    #patchBtn:hover { background: #ffe260; }
+    #patchModal {
+      display: none;
+      position: fixed;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.28);
+      z-index: 20000;
+      align-items: center;
+      justify-content: center;
+    }
+    #patchModal .modal-content {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 6px 32px rgba(0,0,0,0.13);
+      padding: 38px 32px 32px 32px;
+      max-width: 400px;
+      margin: auto;
+      position: relative;
+      animation: patchpop 0.16s cubic-bezier(.68,-0.22,.29,1.26);
+    }
+    @keyframes patchpop {
+      0% { transform: scale(0.97) translateY(40px); opacity: 0.3;}
+      100% { transform: scale(1) translateY(0); opacity: 1;}
+    }
+    #patchModal h3 {margin-top:0; font-size:1.22em; font-weight:800;}
+    #closePatchModal {
+      position: absolute; top:10px; right:16px; border:none;
+      background:none; font-size:21px; font-weight:bold; color:#aaa; cursor:pointer;
+    }
+    #patchModal ul {font-size:16px; margin:16px 0 0 0; padding-left:18px;}
+    .form-group { margin-bottom: 28px; position:relative; display:flex; align-items:center; gap:14px;}
     label { font-weight: bold; margin-right: 8px; font-size: 17px;}
     input[type="text"], select, input[type="date"], input[type="button"] {
-      padding: 0 16px;
-      border-radius: 7px;
-      border: 1px solid #bbb;
-      font-size: 17px;
-      height: 48px;
-      box-sizing: border-box;
-      background: #fff;
+      padding: 0 16px; border-radius: 7px; border: 1px solid #bbb;
+      font-size: 17px; height: 48px; box-sizing: border-box; background: #fff;
     }
-    #courseSelectorBtn {
-      width: 400px;
-      background: #f6f8fa;
-      text-align: left;
-      cursor: pointer;
-    }
-    #selectedCourseLabel {
-      display: inline-block;
-      width: 330px;
-      vertical-align: middle;
-      font-size: 17px;
-      padding-left: 5px;
-      color: #1a1a1a;
-    }
+    #courseSelectorBtn { width: 400px; background: #f6f8fa; text-align: left; cursor: pointer; }
+    #selectedCourseLabel { display: inline-block; width: 330px; vertical-align: middle; font-size: 17px; padding-left: 5px; color: #1a1a1a;}
     #courseTreeMenuWrap {
-      position: absolute; z-index: 9999;
-      background: #fff;
-      border: 1px solid #bbb;
-      border-radius: 10px;
-      margin-top: 5px;
-      box-shadow: 0 8px 18px rgba(0,0,0,0.12);
-      width: 400px;
-      display: none;
+      position: absolute; z-index: 9999; background: #fff;
+      border: 1px solid #bbb; border-radius: 10px; margin-top: 5px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.12); width: 400px; display: none;
     }
-    #courseSearchBox {
-      width: 96%; margin:10px 2% 0 2%;
-      height: 38px; font-size:16px;
-      border: 1px solid #d0d0d0; border-radius:7px;
-      box-sizing: border-box; padding-left:12px;
-    }
+    #courseSearchBox { width: 96%; margin:10px 2% 0 2%; height: 38px; font-size:16px; border: 1px solid #d0d0d0; border-radius:7px; box-sizing: border-box; padding-left:12px;}
     #courseTreeMenu ul { list-style:none; padding:0; margin:0;}
     #courseTreeMenu > ul > li {
-      padding: 12px 18px 11px 14px; font-size:18px; font-weight:700;
-      background:#f4f4f7; cursor:pointer; border-bottom:1px solid #eee;
+      padding: 12px 18px 11px 14px; font-size:18px; font-weight:700; background:#f4f4f7; cursor:pointer; border-bottom:1px solid #eee;
     }
     #courseTreeMenu > ul > li:hover { background: #e4ecf5;}
     #courseTreeMenu ul li ul {
@@ -65,9 +80,7 @@
       transition:background 0.2s;
     }
     #courseTreeMenu ul li ul li:last-child { border-bottom:none;}
-    #courseTreeMenu ul li ul li:hover {
-      background:#eaf5ff; color:#12598e;
-    }
+    #courseTreeMenu ul li ul li:hover { background:#eaf5ff; color:#12598e;}
     .option-group { margin: 13px 0 0 120px; z-index:2; position:relative;}
     .option-row { margin-bottom: 10px; }
     .option-group label { margin-right: 22px; font-weight: normal; display: block; margin-bottom: 3px;}
@@ -85,43 +98,32 @@
     .form-group.duration { z-index:110 !important; }
     .form-group.discount { z-index:10 !important; }
     body, form, .form-group { overflow: visible !important; }
-    .form-group.duration .select2-container {
-      width: 20% !important;
-      min-width: 88px !important;
-      max-width: 120px !important;
-      text-align:left !important;
-    }
-    .form-group.duration .select2-selection {
-      height: 48px !important;
-      padding: 7px 0 7px 16px !important;
-      font-size: 17px !important;
-      border-radius: 7px;
-      text-align:left !important;
-    }
-    form .form-group {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    form .form-group label {
-      min-width: 100px;
-      margin-bottom: 0;
-      text-align: left;
-    }
-    form .form-group input,
-    form .form-group select,
-    form .form-group .select2-container {
-      flex: none;
-      margin: 0;
-    }
-    .form-group input[type="button"],
-    .form-group .select2-container {
-      margin-left: 0;
-    }
+    .form-group.duration .select2-container { width: 20% !important; min-width: 88px !important; max-width: 120px !important; text-align:left !important;}
+    .form-group.duration .select2-selection { height: 48px !important; padding: 7px 0 7px 16px !important; font-size: 17px !important; border-radius: 7px; text-align:left !important;}
   </style>
 </head>
 <body>
   <h2 style="font-size: 2.1em; font-weight: 900; letter-spacing: -1px;">2025 가을학기 수강료 계산기</h2>
+  <!-- 패치내역 박스 (오른쪽 고정) -->
+  <div id="patchBox">
+    <button id="patchBtn" type="button">패치내역</button>
+  </div>
+  <!-- 패치내역 모달 -->
+  <div id="patchModal">
+    <div class="modal-content">
+      <button id="closePatchModal">×</button>
+      <h3>패치내역</h3>
+      <ul>
+<li><b><span style="color:red">사용은 자유이나 오안내에 대한 책임은 각자에게 있습니다</span></b> </li>
+<li><b><span style="color:green">개선사항 및 버그는 정하민 주임에게 보고</span></b> </li>
+<li>-------------------------------------------------------</li>
+        <li>2025-07-24: 수강료 계산기 가을학기로 개편</li>
+        <!-- 원하는 내역을 계속 추가하세요 -->
+      </ul>
+    </div>
+  </div>
+  <!-- ============ 여기까지 패치내역 박스/모달 ============ -->
+
   <form id="tuitionForm" autocomplete="off" style="position:relative;">
     <div class="form-group">
       <label for="studentName">학생 이름</label>
@@ -168,10 +170,22 @@
   </div>
   <button id="copyButton" onclick="copyReservationInfo()" style="display:none;">복사</button>
   <div id="toast"></div>
+
+  <!-- 필수 스크립트 -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/i18n/jquery-ui-i18n.min.js"></script>
+
+  <!-- === 패치내역 모달 동작 코드 === -->
+  <script>
+    $('#patchBtn').on('click', function(){
+      $('#patchModal').fadeIn(120);
+    });
+    $('#closePatchModal, #patchModal').on('click', function(e){
+      if (e.target === this) $('#patchModal').fadeOut(100);
+    });
+  </script>
   <script>
 // (스크립트 시작 부분에 추가)
 const weekdayName = ['일', '월', '화', '수', '목', '금', '토'];
