@@ -51,7 +51,21 @@
       background:none; font-size:21px; font-weight:bold; color:#aaa; cursor:pointer;
     }
     #patchModal ul {font-size:16px; margin:16px 0 0 0; padding-left:18px;}
-    .form-group { margin-bottom: 28px; position:relative; display:flex; align-items:center; gap:14px;}
+.form-group {
+  margin-bottom: 28px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+label {
+  font-weight: bold;
+  margin-right: 8px;
+  font-size: 17px;
+  min-width: 110px;  /* ← 이 부분 추가/수정: 라벨 너비를 통일! */
+  text-align: left;  /* ← 왼쪽 정렬 */
+}
     label { font-weight: bold; margin-right: 8px; font-size: 17px;}
     input[type="text"], select, input[type="date"], input[type="button"] {
       padding: 0 16px; border-radius: 7px; border: 1px solid #bbb;
