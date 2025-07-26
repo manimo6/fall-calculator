@@ -132,6 +132,7 @@ label {
 <li><b><span style="color:green">개선사항 및 버그는 정하민 주임에게 보고</span></b> </li>
 <li>-------------------------------------------------------</li>
         <li>2025-07-24: 수강료 계산기 가을학기로 개편</li>
+        <li>2025-07-26: AP Environmental Science 추가</li>
         <!-- 원하는 내역을 계속 추가하세요 -->
       </ul>
     </div>
@@ -209,7 +210,7 @@ const courseEnabledDays = {
   sat_reg_weekday: null,    // 평일(모든 요일)
   sat_bridge_weekend: [6, 0], sat_bridge_weekday: null,
   ap_calbc: [6], ap_phyc_m: [6], ap_phy1: [6], ap_microecon: [6], ap_precal: [6], ap_phy2: [6], ap_psych: [6], ap_phyc_em: [6],
-  ap_stat: [0], ap_chem: [0], ap_bio: [0], ap_macroecon: [0], ap_calab: [0], ap_worldhis: [0], ap_comsca: [0], ap_comscp: [0],
+  ap_stat: [0], ap_chem: [0], ap_bio: [0], ap_envsci: [0], ap_macroecon: [0], ap_calab: [0], ap_worldhis: [0], ap_comsca: [0], ap_comscp: [0],
   toefl_rl: [6], toefl_sw: [0], toefl_rlsw: [6], toefl_awesome: [6],
   drw_l1a: [1, 3, 5], drw_l2a: [1, 3, 5], drw_americas: [1, 3, 5],
   drw_l1b: [2, 4, 6], drw_l2b: [2, 4, 6],
@@ -301,6 +302,7 @@ $(document).on('change', 'input[name="division"]', setDatepickerEnabledDays);
         {val:'ap_stat', label:'Stat'},
         {val:'ap_chem', label:'Chem'},
         {val:'ap_bio', label:'Bio'},
+        {val:'ap_envsci', label:'Env Science'},
         {val:'ap_macroecon', label:'Macro Econ'},
         {val:'ap_calab', label:'Cal AB'},
         {val:'ap_worldhis', label:'World His'},
@@ -494,6 +496,7 @@ const courseInfo = {
   ap_stat:      {name:"Stat", min:1, max:13, durationType:"week", fee:115000},
   ap_chem:      {name:"Chem", min:1, max:13, durationType:"week", fee:115000},
   ap_bio:       {name:"Bio", min:1, max:13, durationType:"week", fee:115000},
+  ap_envsci: {name:"Env Science", min:1, max:13, durationType:"week", fee:115000},
   ap_macroecon: {name:"Macro Econ", min:1, max:13, durationType:"week", fee:115000},
   ap_calab:     {name:"Cal AB", min:1, max:13, durationType:"week", fee:115000},
   ap_worldhis:  {name:"World His", min:1, max:13, durationType:"week", fee:115000},
@@ -543,6 +546,7 @@ const timeTable = {
   "Bio": { "오전": "11:10~13:10", "저녁": "20:20~22:20" },
   "Phy C-M": "09:00~11:00",
   "Micro Econ": "11:10~13:10",
+  "Env Science": "16:00~18:00",
   "Pre-cal": "16:00~18:00",
   "Phy2": "16:00~18:00",
   "Psychology": "16:00~18:00",
@@ -739,11 +743,11 @@ if (typeof c.fee === 'object' && (c.name === "SAT 정규반")) {
   }
 }
   } else {
-    let apSubjects = [
-      "Cal BC","Phy C-M","Phy1","Micro Econ","Pre-cal","Phy2","Psychology","Phy C-E&M",
-      "Stat","Chem","Bio","Macro Econ","Cal AB","World His","Com.Sc A","Com.Sc P"
-    ];
-    if (apSubjects.includes(c.name)) displayCourseName = "AP " + c.name;
+    // AP 과목 자동 접두사 처리
+    if (courseKey.startsWith("ap_")) {
+      displayCourseName = "AP " + c.name;
+    }
+
     if (courseKey === 'toefl_awesome') {
       let start = new Date(startDate);
       let day = start.getDay();
