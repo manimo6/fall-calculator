@@ -133,6 +133,7 @@ label {
 <li>-------------------------------------------------------</li>
         <li>2025-07-24: 수강료 계산기 가을학기로 개편</li>
         <li>2025-07-26: AP Environmental Science 추가</li>
+        <li>2025-08-11: SAT 브릿지 유형반 Math 추가</li>
         <!-- 원하는 내역을 계속 추가하세요 -->
       </ul>
     </div>
@@ -465,8 +466,11 @@ $(document).on('change', 'input[name="division"]', setDatepickerEnabledDays);
           html += '</div><div class="option-row"><b>시간대:</b>';
           html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
           html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
+          html += '</div><div class="option-row"><b>과목:</b>';
+          html += `<label><input type="checkbox" name="part" value="RW" checked> RW</label>`;
+          html += `<label><input type="checkbox" name="part" value="Math"> Math</label>`;
           html += '</div></div>';
-          box.innerHTML = html;
+  box.innerHTML = html;
         } else if (
           ['ap_calbc','ap_phy1','ap_stat','ap_chem','ap_bio'].includes(v)
         ) {
@@ -536,8 +540,14 @@ const timeTable = {
     "저녁": { "RW": "20:00~22:00", "Math": "22:00~23:30" }
   },
   "SAT 브릿지 유형반": {
-    "평일": { "오전": "10:00~12:00", "저녁": "20:00~22:00" },
-    "주말": { "오전": "10:00~12:00", "저녁": "20:00~22:00" }
+    "평일": {
+      "오전": { "RW": "10:00~12:00", "Math": "12:00~13:30" },
+      "저녁": { "RW": "20:00~22:00", "Math": "22:00~23:30" }
+    },
+    "주말": {
+      "오전": { "RW": "10:00~12:00", "Math": "12:00~13:30" },
+      "저녁": { "RW": "20:00~22:00", "Math": "22:00~23:30" }
+    }
   },
   "Cal BC": { "오전": "09:00~11:00", "저녁": "18:10~20:10" },
   "Phy1": { "오전": "11:10~13:10", "저녁": "18:10~20:10" },
@@ -625,14 +635,17 @@ document.getElementById('course').onchange = function() {
       html += '</div></div>';
       box.innerHTML = html;
     } else if (v === 'sat_bridge') {
-      let html = '<div class="option-group">';
-      html += '<div class="option-row"><b>분반:</b>';
-      html += `<label><input type="radio" name="division" value="평일" checked> 평일</label>`;
-      html += `<label><input type="radio" name="division" value="주말"> 주말</label>`;
-      html += '</div><div class="option-row"><b>시간대:</b>';
-      html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
-      html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
-      html += '</div></div>';
+          let html = '<div class="option-group">';
+          html += '<div class="option-row"><b>분반:</b>';
+          html += `<label><input type="radio" name="division" value="평일" checked> 평일</label>`;
+          html += `<label><input type="radio" name="division" value="주말"> 주말</label>`;
+          html += '</div><div class="option-row"><b>시간대:</b>';
+          html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
+          html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
+          html += '</div><div class="option-row"><b>과목:</b>';
+          html += `<label><input type="checkbox" name="part" value="RW" checked> RW</label>`;
+          html += `<label><input type="checkbox" name="part" value="Math"> Math</label>`;
+          html += '</div></div>';
       box.innerHTML = html;
     } else if (
       ['ap_calbc','ap_phy1','ap_stat','ap_chem','ap_bio'].includes(v)
@@ -714,22 +727,26 @@ function calculateTuition() {
     durationStr = formatCourseDateRange(startDate, period, courseKey, {division})?.label || '';
     // 시간
     if (c.name === "SAT 정규반") {
-      if (!division) division = "평일";
-      if (!timeSlot) timeSlot = "오전";
-      if (parts.length === 0) parts = ["RW"];
-      let t = timeTable["SAT 정규반"][division][timeSlot];
-      timeStr = parts.map(p => `${p}: ${t[p]}`).join('\n') + " (한국시간 기준)";
-    } else if (c.name === "SAT 브릿지 유형반") {
-      if (!division) division = "평일";
-      if (!timeSlot) timeSlot = "오전";
-      let t = timeTable["SAT 브릿지 유형반"][division][timeSlot];
-      timeStr = `${t} (한국시간 기준)`;
-    }
+  if (!division) division = "평일";
+  if (!timeSlot) timeSlot = "오전";
+  if (parts.length === 0) parts = ["RW"];
+  let t = timeTable["SAT 정규반"][division][timeSlot];
+  timeStr = parts.map(p => `${p}: ${t[p]}`).join('\n') + " (한국시간 기준)";
+} else if (c.name === "SAT 브릿지 유형반") {
+  if (!division) division = "평일";
+  if (!timeSlot) timeSlot = "오전";
+  if (parts.length === 0) parts = ["RW"]; // 최소 1개 보정
+  let t = timeTable["SAT 브릿지 유형반"][division][timeSlot];
+  timeStr = parts.map(p => `${p}: ${t[p]}`).join('\n') + " (한국시간 기준)";
+}
     // 수강료
-    if (courseKey === 'sat_bridge') {
-      // 분반 무관하게 주당 120,000원
-      totalFee = 120000 * period;
-    }
+if (courseKey === 'sat_bridge') {
+  // 최소 1개 선택 검증
+  if (!parts || parts.length === 0) return showToast('브릿지 유형반은 RW 또는 Math 중 최소 1개 이상 선택하세요.');
+
+  const perWeek = (parts.includes("RW") ? 120000 : 0) + (parts.includes("Math") ? 42500 : 0);
+  totalFee = perWeek * period;
+}
 if (typeof c.fee === 'object' && (c.name === "SAT 정규반")) {
   // SAT 정규반 요금: RW만/Math만/둘 다
   if (parts.length === 1 && parts[0] === "Math") {
