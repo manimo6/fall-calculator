@@ -6,11 +6,7 @@
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
   <style>
-    body {   font-family: 'Noto Sans KR', Arial, sans-serif;
-  background: url('background.jpg') no-repeat center center fixed;
-  background-size: cover; /* 화면 크기에 맞춰 채우기 */
-  margin: 40px;
-  font-size: 18px;}
+    body { font-family: 'Noto Sans KR', Arial, sans-serif; background: #f9f9f9; margin: 40px; font-size: 18px;}
     form { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.08); padding: 28px; max-width: 700px; }
     #patchBox { position: fixed; top: 80px; right: 80px; z-index: 1050; }
     #patchBtn {
@@ -55,22 +51,20 @@
       background:none; font-size:21px; font-weight:bold; color:#aaa; cursor:pointer;
     }
     #patchModal ul {font-size:16px; margin:16px 0 0 0; padding-left:18px;}
-.form-group {
-  margin-bottom: 28px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-label {
-  font-weight: bold;
-  margin-right: 8px;
-  font-size: 17px;
-  min-width: 110px;  /* ← 이 부분 추가/수정: 라벨 너비를 통일! */
-  text-align: left;  /* ← 왼쪽 정렬 */
-}
-    label { font-weight: bold; margin-right: 8px; font-size: 17px;}
+    .form-group {
+      margin-bottom: 28px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    label {
+      font-weight: bold;
+      margin-right: 8px;
+      font-size: 17px;
+      min-width: 110px;
+      text-align: left;
+    }
     input[type="text"], select, input[type="date"], input[type="button"] {
       padding: 0 16px; border-radius: 7px; border: 1px solid #bbb;
       font-size: 17px; height: 48px; box-sizing: border-box; background: #fff;
@@ -122,15 +116,13 @@ label {
 </head>
 <body>
   <h2 style="font-size: 2.1em; font-weight: 900; letter-spacing: -1px;">2025 가을학기 수강료 계산기</h2>
-  <!-- 패치내역 박스 (오른쪽 고정) -->
   <div id="patchBox">
     <button id="patchBtn" type="button">패치내역</button>
   </div>
-  <!-- 패치내역 모달 -->
   <div id="patchModal">
     <div class="modal-content">
       <button id="closePatchModal">×</button>
-      <h3>패치내역 ver 1.0.4</h3>
+      <h3>패치내역 ver 1.0.5</h3>
       <ul>
 <li><b><span style="color:red">사용은 자유이나 오안내에 대한 책임은 각자에게 있습니다</span></b> </li>
 <li><b><span style="color:green">개선사항 및 버그는 정하민 주임에게 보고</span></b> </li>
@@ -139,11 +131,10 @@ label {
         <li>2025-07-26: AP Environmental Science 추가</li>
         <li>2025-08-11: SAT 브릿지 유형반 Math 추가</li>
         <li>2025-08-12: IGCSE Add Math 시간수정</li>
-        <!-- 원하는 내역을 계속 추가하세요 -->
+        <li>2025-10-02: SAT 브릿지 독해반 추가</li>
       </ul>
     </div>
   </div>
-  <!-- ============ 여기까지 패치내역 박스/모달 ============ -->
 
   <form id="tuitionForm" autocomplete="off" style="position:relative;">
     <div class="form-group">
@@ -192,14 +183,11 @@ label {
   <button id="copyButton" onclick="copyReservationInfo()" style="display:none;">복사</button>
   <div id="toast"></div>
 
-  <!-- 필수 스크립트 -->
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/i18n/jquery-ui-i18n.min.js"></script>
-
-  <!-- === 패치내역 모달 동작 코드 === -->
-  <script>
+<script>
     $('#patchBtn').on('click', function(){
       $('#patchModal').fadeIn(120);
     });
@@ -208,13 +196,12 @@ label {
     });
   </script>
   <script>
-// (스크립트 시작 부분에 추가)
 const weekdayName = ['일', '월', '화', '수', '목', '금', '토'];
-// ========== 요일 제한 테이블 (분반/과목코드별) ==========
 const courseEnabledDays = {
-  sat_reg_weekend: [6, 0], // 토, 일
-  sat_reg_weekday: null,    // 평일(모든 요일)
+  sat_reg_weekend: [6, 0],
+  sat_reg_weekday: null,
   sat_bridge_weekend: [6, 0], sat_bridge_weekday: null,
+  sat_bridge2_weekend: [6, 0],
   ap_calbc: [6], ap_phyc_m: [6], ap_phy1: [6], ap_microecon: [6], ap_precal: [6], ap_phy2: [6], ap_psych: [6], ap_phyc_em: [6],
   ap_stat: [0], ap_chem: [0], ap_bio: [0], ap_envsci: [0], ap_macroecon: [0], ap_calab: [0], ap_worldhis: [0], ap_comsca: [0], ap_comscp: [0],
   toefl_rl: [6], toefl_sw: [0], toefl_rlsw: [6], toefl_awesome: [6],
@@ -230,7 +217,6 @@ function dayFilter(date) {
   return [enabledDays.includes(date.getDay()), ""];
 }
 
-// ⭐️ "setDatepickerEnabledDays"는 이걸로 전체 교체!
 function setDatepickerEnabledDays() {
   const courseKey = document.getElementById('course').value;
   let key = courseKey;
@@ -238,6 +224,9 @@ function setDatepickerEnabledDays() {
     const division = document.querySelector('input[name="division"]:checked')?.value;
     if (division === '주말') key += '_weekend';
     else key += '_weekday';
+  }
+  if (courseKey === 'sat_bridge2') {
+    key = 'sat_bridge2_weekend';
   }
   enabledDays = courseEnabledDays[key] || null;
   $('#startDate').datepicker('destroy');
@@ -251,7 +240,6 @@ function setDatepickerEnabledDays() {
   });
 }
 
-// ========== 달력(datepicker) 관련 ==========
 $.datepicker.setDefaults({
   dateFormat: 'yy-mm-dd',
   prevText: '이전 달',
@@ -272,228 +260,238 @@ $('#startDate').datepicker({
   beforeShowDay: dayFilter
 });
 
-// ⭐️ "분반 라디오 바꿀 때도 즉시 반영!" 까지 붙이세요!
 document.getElementById('course').onchange = function(){
   setDatepickerEnabledDays();
 };
 $(document).on('change', 'input[name="division"]', setDatepickerEnabledDays);
-    // ========== 아래부터는 기존 로직 그대로(생략/압축 가능), 핵심만 붙이면 동작 ==========
-    function applySelect2ToDuration() {
-      $('#duration').select2({
-        minimumResultsForSearch: Infinity,
-        dropdownParent: $('.form-group.duration'),
-        width: 'style',
-        language: "ko"
-      });
+
+function applySelect2ToDuration() {
+  $('#duration').select2({
+    minimumResultsForSearch: Infinity,
+    dropdownParent: $('.form-group.duration'),
+    width: 'style',
+    language: "ko"
+  });
+}
+$(document).ready(function() {
+  applySelect2ToDuration();
+});
+
+const courseTree = [
+  {cat:'SAT', items:[
+    {val:'sat_reg', label:'SAT 정규반'},
+    {val:'sat_intense', label:'SAT 직전대비반'},
+    {val:'sat_bridge', label:'SAT 브릿지 유형반'},
+    {val:'sat_bridge2', label:'SAT 브릿지 독해반'}
+  ]},
+  {cat:'AP', items:[
+    {val:'ap_calbc', label:'Cal BC'},
+    {val:'ap_phyc_m', label:'Phy C-M'},
+    {val:'ap_phy1', label:'Phy1'},
+    {val:'ap_microecon', label:'Micro Econ'},
+    {val:'ap_precal', label:'Pre-cal'},
+    {val:'ap_phy2', label:'Phy2'},
+    {val:'ap_psych', label:'Psychology'},
+    {val:'ap_phyc_em', label:'Phy C-E&M'},
+    {val:'ap_stat', label:'Stat'},
+    {val:'ap_chem', label:'Chem'},
+    {val:'ap_bio', label:'Bio'},
+    {val:'ap_envsci', label:'Env Science'},
+    {val:'ap_macroecon', label:'Macro Econ'},
+    {val:'ap_calab', label:'Cal AB'},
+    {val:'ap_worldhis', label:'World His'},
+    {val:'ap_comsca', label:'Com.Sc A'},
+    {val:'ap_comscp', label:'Com.Sc P'}
+  ]},
+  {cat:'TOEFL', items:[
+    {val:'toefl_rl', label:'TOEFL R/L'},
+    {val:'toefl_sw', label:'TOEFL S/W'},
+    {val:'toefl_rlsw', label:'TOEFL R/L, S/W'},
+    {val:'toefl_awesome', label:'TOEFL 어썸 실전반'}
+  ]},
+  {cat:'DRW', items:[
+    {val:'drw_l1a', label:'DRW L1A'},
+    {val:'drw_l1b', label:'DRW L1B'},
+    {val:'drw_l2a', label:'DRW L2A'},
+    {val:'drw_l2b', label:'DRW L2B'},
+    {val:'drw_l3', label:'DRW L3'},
+    {val:'drw_americas', label:'DRW 미주&국제반'},
+    {val:'drw_europe', label:'DRW 유럽/남미반'}
+  ]},
+  {cat:'Drill Math', items:[
+    {val:'dm_alg1', label:'Algebra 1'},
+    {val:'dm_alg2', label:'Algebra 2'},
+    {val:'dm_geom', label:'Geometry'},
+    {val:'dm_alg2pre', label:'Algebra2 심화 + Pre-cal'},
+    {val:'dm_igcse', label:'IGCSE Extended Additional Math'}
+  ]}
+];
+
+function renderCourseTreeMenu() {
+  let html = '<ul>';
+  for (const grp of courseTree) {
+    html += `<li class="maincat">${grp.cat}<ul>`;
+    for (const c of grp.items)
+      html += `<li data-val="${c.val}">${c.label}</li>`;
+    html += `</ul></li>`;
+  }
+  html += '</ul>';
+  $('#courseTreeMenu').html(html);
+  let sel = $('#course'); sel.empty();
+  for (const grp of courseTree) {
+    let optg = $(`<optgroup label="${grp.cat}"></optgroup>`);
+    for (const c of grp.items) {
+      optg.append(`<option value="${c.val}">${c.label}</option>`);
     }
-    $(document).ready(function() {
-      applySelect2ToDuration();
-    });
-    // ==== 과목트리/검색/동적 옵션 ====
-    const courseTree = [
-      {cat:'SAT', items:[
-        {val:'sat_reg', label:'SAT 정규반'},
-        {val:'sat_intense', label:'SAT 직전대비반'},
-        {val:'sat_bridge', label:'SAT 브릿지 유형반'}
-      ]},
-      {cat:'AP', items:[
-        {val:'ap_calbc', label:'Cal BC'},
-        {val:'ap_phyc_m', label:'Phy C-M'},
-        {val:'ap_phy1', label:'Phy1'},
-        {val:'ap_microecon', label:'Micro Econ'},
-        {val:'ap_precal', label:'Pre-cal'},
-        {val:'ap_phy2', label:'Phy2'},
-        {val:'ap_psych', label:'Psychology'},
-        {val:'ap_phyc_em', label:'Phy C-E&M'},
-        {val:'ap_stat', label:'Stat'},
-        {val:'ap_chem', label:'Chem'},
-        {val:'ap_bio', label:'Bio'},
-        {val:'ap_envsci', label:'Env Science'},
-        {val:'ap_macroecon', label:'Macro Econ'},
-        {val:'ap_calab', label:'Cal AB'},
-        {val:'ap_worldhis', label:'World His'},
-        {val:'ap_comsca', label:'Com.Sc A'},
-        {val:'ap_comscp', label:'Com.Sc P'}
-      ]},
-      {cat:'TOEFL', items:[
-        {val:'toefl_rl', label:'TOEFL R/L'},
-        {val:'toefl_sw', label:'TOEFL S/W'},
-        {val:'toefl_rlsw', label:'TOEFL R/L, S/W'},
-        {val:'toefl_awesome', label:'TOEFL 어썸 실전반'}
-      ]},
-      {cat:'DRW', items:[
-        {val:'drw_l1a', label:'DRW L1A'},
-        {val:'drw_l1b', label:'DRW L1B'},
-        {val:'drw_l2a', label:'DRW L2A'},
-        {val:'drw_l2b', label:'DRW L2B'},
-        {val:'drw_l3', label:'DRW L3'},
-        {val:'drw_americas', label:'DRW 미주&국제반'},
-        {val:'drw_europe', label:'DRW 유럽/남미반'}
-      ]},
-      {cat:'Drill Math', items:[
-        {val:'dm_alg1', label:'Algebra 1'},
-        {val:'dm_alg2', label:'Algebra 2'},
-        {val:'dm_geom', label:'Geometry'},
-        {val:'dm_alg2pre', label:'Algebra2 심화 + Pre-cal'},
-        {val:'dm_igcse', label:'IGCSE Extended Additional Math'}
-      ]}
-    ];
-    function renderCourseTreeMenu() {
-      let html = '<ul>';
-      for (const grp of courseTree) {
-        html += `<li class="maincat">${grp.cat}<ul>`;
-        for (const c of grp.items)
-          html += `<li data-val="${c.val}">${c.label}</li>`;
-        html += `</ul></li>`;
-      }
-      html += '</ul>';
-      $('#courseTreeMenu').html(html);
-      let sel = $('#course'); sel.empty();
-      for (const grp of courseTree) {
-        let optg = $(`<optgroup label="${grp.cat}"></optgroup>`);
-        for (const c of grp.items) {
-          optg.append(`<option value="${c.val}">${c.label}</option>`);
-        }
-        sel.append(optg);
-      }
-    }
-    renderCourseTreeMenu();
-    $('#courseSelectorBtn').on('click', function(e){
-      $('#courseSearchBox').val('');
-      $('#courseTreeMenu > ul > li').show().find('ul li').show();
-      $('#courseTreeMenu > ul > li').find('ul').hide();
-      $('#courseTreeMenu ul > li.maincat:first-child ul').show();
-      $('#courseTreeMenuWrap').toggle();
-      $(document).on('mousedown.coursemenu', function(evt){
-        if (!$(evt.target).closest('#courseTreeMenuWrap,#courseSelectorBtn').length)
-          $('#courseTreeMenuWrap').hide();
-      });
-    });
-    $('#courseTreeMenu').on('click', 'li.maincat', function(e){
-      $(this).find('ul').slideToggle(120);
-      $(this).siblings().find('ul').slideUp(100);
-      e.stopPropagation();
-    });
-    $('#courseTreeMenu').on('click', 'ul li[data-val]', function(e){
-      let courseVal = $(this).data('val');
-      let courseLabel = $(this).text();
-      $('#courseSelectorBtn').val(courseLabel);
-      $('#selectedCourseLabel').text('');
-      $('#courseSelectorBtn').data('courseval', courseVal);
+    sel.append(optg);
+  }
+}
+renderCourseTreeMenu();
+
+$('#courseSelectorBtn').on('click', function(e){
+  $('#courseSearchBox').val('');
+  $('#courseTreeMenu > ul > li').show().find('ul li').show();
+  $('#courseTreeMenu > ul > li').find('ul').hide();
+  $('#courseTreeMenu ul > li.maincat:first-child ul').show();
+  $('#courseTreeMenuWrap').toggle();
+  $(document).on('mousedown.coursemenu', function(evt){
+    if (!$(evt.target).closest('#courseTreeMenuWrap,#courseSelectorBtn').length)
       $('#courseTreeMenuWrap').hide();
-      $('#course').val(courseVal).trigger('change');
-      e.stopPropagation();
+  });
+});
+
+$('#courseTreeMenu').on('click', 'li.maincat', function(e){
+  $(this).find('ul').slideToggle(120);
+  $(this).siblings().find('ul').slideUp(100);
+  e.stopPropagation();
+});
+
+$('#courseTreeMenu').on('click', 'ul li[data-val]', function(e){
+  let courseVal = $(this).data('val');
+  let courseLabel = $(this).text();
+  $('#courseSelectorBtn').val(courseLabel);
+  $('#selectedCourseLabel').text('');
+  $('#courseSelectorBtn').data('courseval', courseVal);
+  $('#courseTreeMenuWrap').hide();
+  $('#course').val(courseVal).trigger('change');
+  e.stopPropagation();
+});
+
+$('#courseTreeMenu ul > li.maincat:first-child ul').show();
+
+$('#courseSearchBox').on('input', function(){
+  let kw = $(this).val().toLowerCase().trim();
+  $('#courseTreeMenu > ul > li').each(function(){
+    let matched = false;
+    $(this).find('ul li').each(function(){
+      if (!kw || $(this).text().toLowerCase().includes(kw)) {
+        $(this).show();
+        matched = true;
+      } else $(this).hide();
     });
-    $('#courseTreeMenu ul > li.maincat:first-child ul').show();
-    $('#courseSearchBox').on('input', function(){
-      let kw = $(this).val().toLowerCase().trim();
-      $('#courseTreeMenu > ul > li').each(function(){
-        let matched = false;
-        $(this).find('ul li').each(function(){
-          if (!kw || $(this).text().toLowerCase().includes(kw)) {
-            $(this).show();
-            matched = true;
-          } else $(this).hide();
-        });
-        if (matched) {
-          $(this).show();
-          $(this).find('ul').show();
-        } else {
-          $(this).hide();
-          $(this).find('ul').hide();
-        }
-      });
-    });
+    if (matched) {
+      $(this).show();
+      $(this).find('ul').show();
+    } else {
+      $(this).hide();
+      $(this).find('ul').hide();
+    }
+  });
+});
+document.getElementById('course').onchange = function() {
+  setDatepickerEnabledDays();
+  let v = this.value;
+  let box = document.getElementById('extraOptions');
+  box.innerHTML = '';
+  try { $('#duration').select2('destroy'); } catch(e){}
+  $('#duration').empty();
 
-    // ---- 옵션 및 시간 자동 출력 ---- (수정버전)
-    document.getElementById('course').onchange = function() {
-      setDatepickerEnabledDays();
+  if (!v || !courseInfo[v]) {
+    applySelect2ToDuration();
+    return;
+  }
+  let c = courseInfo[v];
+  let unit = (c.durationType==='day') ? '일' : (c.durationType==='set') ? 'set' : '주';
+  document.getElementById('durationLabel').textContent = `수강 기간${unit==='set'?'(set)':''}`;
 
-      let v = this.value;
-      let box = document.getElementById('extraOptions');
-      box.innerHTML = '';
+  if (v === 'sat_intense') {
+    $('#duration').append(`<option value="0">-</option>`);
+    applySelect2ToDuration();
+    let html = '<div class="option-group">';
+    html += '<div class="option-row"><b>시간대:</b>';
+    html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
+    html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
+    html += '</div>';
+    html += '<div class="option-row"><b>RW 수강 횟수:</b>';
+    html += `<select id="rwCount">`;
+    for(let i=0;i<=4;i++) html += `<option value="${i}">${i}회</option>`;
+    html += `</select></div>`;
+    html += '<div class="option-row"><b>Math 수강 횟수:</b>';
+    html += `<select id="mathCount">`;
+    for(let i=0;i<=2;i++) html += `<option value="${i}">${i}회</option>`;
+    html += `</select></div>`;
+    html += '<div style="color:#c44;font-size:15px;margin-top:8px;">※ RW, Math 둘 중 하나 이상은 1회 이상 선택</div>';
+    html += '</div>';
+    box.innerHTML = html;
+  } else {
+    for(let i=c.min; i<=c.max; ++i) {
+      let label = (unit==='set') ? `${i}set` : `${i}${unit}`;
+      $('#duration').append(`<option value="${i}">${label}</option>`);
+    }
+    applySelect2ToDuration();
+    if (v === 'sat_reg') {
+      let html = '<div class="option-group">';
+      html += '<div class="option-row"><b>분반:</b>';
+      html += `<label><input type="radio" name="division" value="평일" checked> 평일</label>`;
+      html += `<label><input type="radio" name="division" value="주말"> 주말</label>`;
+      html += '</div><div class="option-row"><b>시간대:</b>';
+      html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
+      html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
+      html += '</div><div class="option-row"><b>과목:</b>';
+      html += `<label><input type="checkbox" name="part" value="RW" checked> RW</label>`;
+      html += `<label><input type="checkbox" name="part" value="Math"> Math</label>`;
+      html += '</div></div>';
+      box.innerHTML = html;
+    } else if (v === 'sat_bridge') {
+      let html = '<div class="option-group">';
+      html += '<div class="option-row"><b>분반:</b>';
+      html += `<label><input type="radio" name="division" value="평일" checked> 평일</label>`;
+      html += `<label><input type="radio" name="division" value="주말"> 주말</label>`;
+      html += '</div><div class="option-row"><b>시간대:</b>';
+      html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
+      html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
+      html += '</div><div class="option-row"><b>과목:</b>';
+      html += `<label><input type="checkbox" name="part" value="RW" checked> RW</label>`;
+      html += `<label><input type="checkbox" name="part" value="Math"> Math</label>`;
+      html += '</div></div>';
+      box.innerHTML = html;
+    } else if (v === 'sat_bridge2') {
+      let html = '<div class="option-group">';
+      html += '<div class="option-row"><b>분반:</b>';
+      html += `<label><input type="radio" name="division" value="주말" checked> 주말</label>`;
+      html += '</div><div class="option-row"><b>시간대:</b>';
+      html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
+      html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
+      html += '</div></div>';
+      box.innerHTML = html;
+    } else if (
+      ['ap_calbc','ap_phy1','ap_stat','ap_chem','ap_bio'].includes(v)
+    ) {
+      let html = '<div class="option-group">';
+      html += '<div class="option-row"><b>시간대:</b>';
+      html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
+      html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
+      html += '</div></div>';
+      box.innerHTML = html;
+    }
+  }
+};
 
-      // 항상 duration 드롭다운부터 리셋!
-      try { $('#duration').select2('destroy'); } catch(e){}
-      $('#duration').empty();
-
-      if (!v || !courseInfo[v]) {
-        applySelect2ToDuration();
-        return;
-      }
-      let c = courseInfo[v];
-      let unit = (c.durationType==='day') ? '일' : (c.durationType==='set') ? 'set' : '주';
-      document.getElementById('durationLabel').textContent = `수강 기간${unit==='set'?'(set)':''}`;
-
-      if (v === 'sat_intense') {
-        $('#duration').append(`<option value="0">-</option>`);
-        applySelect2ToDuration();
-        let html = '<div class="option-group">';
-        html += '<div class="option-row"><b>시간대:</b>';
-        html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
-        html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
-        html += '</div>';
-        html += '<div class="option-row"><b>RW 수강 횟수:</b>';
-        html += `<select id="rwCount">`;
-        for(let i=0;i<=4;i++) html += `<option value="${i}">${i}회</option>`;
-        html += `</select></div>`;
-        html += '<div class="option-row"><b>Math 수강 횟수:</b>';
-        html += `<select id="mathCount">`;
-        for(let i=0;i<=2;i++) html += `<option value="${i}">${i}회</option>`;
-        html += `</select></div>`;
-        html += '<div style="color:#c44;font-size:15px;margin-top:8px;">※ RW, Math 둘 중 하나 이상은 1회 이상 선택</div>';
-        html += '</div>';
-        box.innerHTML = html;
-      } else {
-        for(let i=c.min; i<=c.max; ++i) {
-          let label = (unit==='set') ? `${i}set` : `${i}${unit}`;
-          $('#duration').append(`<option value="${i}">${label}</option>`);
-        }
-        applySelect2ToDuration();
-        if (v === 'sat_reg') {
-          let html = '<div class="option-group">';
-          html += '<div class="option-row"><b>분반:</b>';
-          html += `<label><input type="radio" name="division" value="평일" checked> 평일</label>`;
-          html += `<label><input type="radio" name="division" value="주말"> 주말</label>`;
-          html += '</div><div class="option-row"><b>시간대:</b>';
-          html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
-          html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
-          html += '</div><div class="option-row"><b>과목:</b>';
-          html += `<label><input type="checkbox" name="part" value="RW" checked> RW</label>`;
-          html += `<label><input type="checkbox" name="part" value="Math"> Math</label>`;
-          html += '</div></div>';
-          box.innerHTML = html;
-        } else if (v === 'sat_bridge') {
-          let html = '<div class="option-group">';
-          html += '<div class="option-row"><b>분반:</b>';
-          html += `<label><input type="radio" name="division" value="평일" checked> 평일</label>`;
-          html += `<label><input type="radio" name="division" value="주말"> 주말</label>`;
-          html += '</div><div class="option-row"><b>시간대:</b>';
-          html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
-          html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
-          html += '</div><div class="option-row"><b>과목:</b>';
-          html += `<label><input type="checkbox" name="part" value="RW" checked> RW</label>`;
-          html += `<label><input type="checkbox" name="part" value="Math"> Math</label>`;
-          html += '</div></div>';
-  box.innerHTML = html;
-        } else if (
-          ['ap_calbc','ap_phy1','ap_stat','ap_chem','ap_bio'].includes(v)
-        ) {
-          let html = '<div class="option-group">';
-          html += '<div class="option-row"><b>시간대:</b>';
-          html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
-          html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
-          html += '</div></div>';
-          box.innerHTML = html;
-        }
-      }
-    };
-
-// ==== 과목/기간/수강료 데이터 (fee 단위: 원) ====
 const courseInfo = {
   sat_reg:      {name:"SAT 정규반", min:1, max:4, durationType:"week", fee:{평일:200000, 주말:200000}},
   sat_intense:  {name:"SAT 직전대비반", min:1, max:4, durationType:"day", fee:{1:150000,2:260000,3:330000,4:400000}},
   sat_bridge:   {name:"SAT 브릿지 유형반", min:1, max:14, durationType:"week", fee:120000},
+  sat_bridge2:  {name:"SAT 브릿지 독해반", min:1, max:6, durationType:"week", fee:120000},
   ap_calbc:     {name:"Cal BC", min:1, max:13, durationType:"week", fee:115000},
   ap_phyc_m:    {name:"Phy C-M", min:1, max:13, durationType:"week", fee:115000},
   ap_phy1:      {name:"Phy1", min:1, max:13, durationType:"week", fee:115000},
@@ -505,7 +503,7 @@ const courseInfo = {
   ap_stat:      {name:"Stat", min:1, max:13, durationType:"week", fee:115000},
   ap_chem:      {name:"Chem", min:1, max:13, durationType:"week", fee:115000},
   ap_bio:       {name:"Bio", min:1, max:13, durationType:"week", fee:115000},
-  ap_envsci: {name:"Env Science", min:1, max:13, durationType:"week", fee:115000},
+  ap_envsci:    {name:"Env Science", min:1, max:13, durationType:"week", fee:115000},
   ap_macroecon: {name:"Macro Econ", min:1, max:13, durationType:"week", fee:115000},
   ap_calab:     {name:"Cal AB", min:1, max:13, durationType:"week", fee:115000},
   ap_worldhis:  {name:"World His", min:1, max:13, durationType:"week", fee:115000},
@@ -554,6 +552,12 @@ const timeTable = {
       "저녁": { "RW": "20:00~22:00", "Math": "22:00~23:30" }
     }
   },
+  "SAT 브릿지 독해반": {
+    "주말": {
+      "오전": { "RW": "10:00~12:00" },
+      "저녁": { "RW": "18:00~20:00" }
+    }
+  },
   "Cal BC": { "오전": "09:00~11:00", "저녁": "18:10~20:10" },
   "Phy1": { "오전": "11:10~13:10", "저녁": "18:10~20:10" },
   "Stat": { "오전": "09:00~11:00", "저녁": "18:10~20:10" },
@@ -586,87 +590,9 @@ const timeTable = {
   "Algebra 2": "11:10~13:10",
   "Geometry": "11:10~13:10",
   "Algebra2 심화 + Pre-cal": "11:10~13:10",
-  "IGCSE Extended Additional Math": "20:20~22:20"
+  "IGCSE Extended Additional Math": "16:20~18:20"
 };
 
-// ---- 옵션 및 시간 자동 출력 ----
-document.getElementById('course').onchange = function() {
-  let v = this.value;
-  let box = document.getElementById('extraOptions');
-  box.innerHTML = '';
-  $('#duration').empty().select2('destroy');
-  if (!v || !courseInfo[v]) { applySelect2ToDuration(); return; }
-  let c = courseInfo[v];
-  let unit = (c.durationType==='day') ? '일' : (c.durationType==='set') ? 'set' : '주';
-  document.getElementById('durationLabel').textContent = `수강 기간${unit==='set'?'(set)':''}`;
-
-  if (v === 'sat_intense') {
-    // SAT 직전대비반: 기간 select 숨김, 개별 횟수 select 노출
-    $('#duration').append(`<option value="0">-</option>`);
-    applySelect2ToDuration();
-    let html = '<div class="option-group">';
-    html += '<div class="option-row"><b>시간대:</b>';
-    html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
-    html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
-    html += '</div>';
-    html += '<div class="option-row"><b>RW 수강 횟수:</b>';
-    html += `<select id="rwCount">`;
-    for(let i=0;i<=4;i++) html += `<option value="${i}">${i}회</option>`;
-    html += `</select></div>`;
-    html += '<div class="option-row"><b>Math 수강 횟수:</b>';
-    html += `<select id="mathCount">`;
-    for(let i=0;i<=2;i++) html += `<option value="${i}">${i}회</option>`;
-    html += `</select></div>`;
-    html += '<div style="color:#c44;font-size:15px;margin-top:8px;">※ RW, Math 둘 중 하나 이상은 1회 이상 선택</div>';
-    html += '</div>';
-    box.innerHTML = html;
-  } else {
-    for(let i=c.min; i<=c.max; ++i) {
-      let label = (unit==='set') ? `${i}set` : `${i}${unit}`;
-      $('#duration').append(`<option value="${i}">${label}</option>`);
-    }
-    applySelect2ToDuration();
-    if (v === 'sat_reg') {
-      let html = '<div class="option-group">';
-      html += '<div class="option-row"><b>분반:</b>';
-      html += `<label><input type="radio" name="division" value="평일" checked> 평일</label>`;
-      html += `<label><input type="radio" name="division" value="주말"> 주말</label>`;
-      html += '</div><div class="option-row"><b>시간대:</b>';
-      html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
-      html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
-      html += '</div><div class="option-row"><b>과목:</b>';
-      html += `<label><input type="checkbox" name="part" value="RW" checked> RW</label>`;
-      html += `<label><input type="checkbox" name="part" value="Math"> Math</label>`;
-      html += '</div></div>';
-      box.innerHTML = html;
-    } else if (v === 'sat_bridge') {
-          let html = '<div class="option-group">';
-          html += '<div class="option-row"><b>분반:</b>';
-          html += `<label><input type="radio" name="division" value="평일" checked> 평일</label>`;
-          html += `<label><input type="radio" name="division" value="주말"> 주말</label>`;
-          html += '</div><div class="option-row"><b>시간대:</b>';
-          html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
-          html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
-          html += '</div><div class="option-row"><b>과목:</b>';
-          html += `<label><input type="checkbox" name="part" value="RW" checked> RW</label>`;
-          html += `<label><input type="checkbox" name="part" value="Math"> Math</label>`;
-          html += '</div></div>';
-      box.innerHTML = html;
-    } else if (
-      ['ap_calbc','ap_phy1','ap_stat','ap_chem','ap_bio'].includes(v)
-    ) {
-      let html = '<div class="option-group">';
-      html += '<div class="option-row"><b>시간대:</b>';
-      html += `<label><input type="radio" name="timeSlot" value="오전" checked> 오전</label>`;
-      html += `<label><input type="radio" name="timeSlot" value="저녁"> 저녁</label>`;
-      html += '</div></div>';
-      box.innerHTML = html;
-    }
-  }
-  setDatepickerEnabledDays();
-};
-
-// ---- 계산 함수 (SAT 직전대비반 옵션 반영) ----
 function calculateTuition() {
   let studentName = document.getElementById('studentName').value.trim();
   let courseKey = document.getElementById('course').value;
@@ -698,14 +624,12 @@ function calculateTuition() {
     if (mathCount>0) sum += mathTable[mathCount] ?? 0;
     totalFee = sum;
 
-    // [수강과목] 표기
     let partsLabel = [];
     if (rwCount>0) partsLabel.push("RW");
     if (mathCount>0) partsLabel.push("Math");
     let partsText = partsLabel.length===2 ? "RW&Math" : (partsLabel[0] || "");
     displayCourseName = `${c.name} ${timeSlot||""}반 ${partsText}`.replace(/\s+/g, " ").trim();
 
-    // [수강기간] "일" 단위!
     let maxDay = Math.max(rwCount, mathCount);
     if (maxDay>0) {
       let start = new Date(startDate);
@@ -718,7 +642,6 @@ function calculateTuition() {
       durationStr = '-';
     }
 
-    // [수업시간]
     let t = timeTable["SAT 직전대비반"][timeSlot||"오전"];
     let times = [];
     if (rwCount>0) times.push(`RW: ${t["RW"]}`);
@@ -730,42 +653,46 @@ function calculateTuition() {
     let partKor = (parts.length === 2) ? "RW&Math" : (parts[0] || "");
     displayCourseName = `${c.name} ${divisionKor} ${timeSlotKor}반 ${partKor}`.replace(/\s+/g, " ").trim();
     durationStr = formatCourseDateRange(startDate, period, courseKey, {division})?.label || '';
-    // 시간
+    
     if (c.name === "SAT 정규반") {
-  if (!division) division = "평일";
-  if (!timeSlot) timeSlot = "오전";
-  if (parts.length === 0) parts = ["RW"];
-  let t = timeTable["SAT 정규반"][division][timeSlot];
-  timeStr = parts.map(p => `${p}: ${t[p]}`).join('\n') + " (한국시간 기준)";
-} else if (c.name === "SAT 브릿지 유형반") {
-  if (!division) division = "평일";
-  if (!timeSlot) timeSlot = "오전";
-  if (parts.length === 0) parts = ["RW"]; // 최소 1개 보정
-  let t = timeTable["SAT 브릿지 유형반"][division][timeSlot];
-  timeStr = parts.map(p => `${p}: ${t[p]}`).join('\n') + " (한국시간 기준)";
-}
-    // 수강료
-if (courseKey === 'sat_bridge') {
-  // 최소 1개 선택 검증
-  if (!parts || parts.length === 0) return showToast('브릿지 유형반은 RW 또는 Math 중 최소 1개 이상 선택하세요.');
-
-  const perWeek = (parts.includes("RW") ? 120000 : 0) + (parts.includes("Math") ? 42500 : 0);
-  totalFee = perWeek * period;
-}
-if (typeof c.fee === 'object' && (c.name === "SAT 정규반")) {
-  // SAT 정규반 요금: RW만/Math만/둘 다
-  if (parts.length === 1 && parts[0] === "Math") {
-    totalFee = 70000 * period;
-  } else if (parts.length === 1 && parts[0] === "RW") {
-    totalFee = 200000 * period;
-  } else if (parts.length === 2 && parts.includes("RW") && parts.includes("Math")) {
-    totalFee = 270000 * period;
+      if (!division) division = "평일";
+      if (!timeSlot) timeSlot = "오전";
+      if (parts.length === 0) parts = ["RW"];
+      let t = timeTable["SAT 정규반"][division][timeSlot];
+      timeStr = parts.map(p => `${p}: ${t[p]}`).join('\n') + " (한국시간 기준)";
+    } else if (c.name === "SAT 브릿지 유형반") {
+      if (!division) division = "평일";
+      if (!timeSlot) timeSlot = "오전";
+      if (parts.length === 0) parts = ["RW"];
+      let t = timeTable["SAT 브릿지 유형반"][division][timeSlot];
+      timeStr = parts.map(p => `${p}: ${t[p]}`).join('\n') + " (한국시간 기준)";
+    }
+    
+    if (courseKey === 'sat_bridge') {
+      if (!parts || parts.length === 0) return showToast('브릿지 유형반은 RW 또는 Math 중 최소 1개 이상 선택하세요.');
+      const perWeek = (parts.includes("RW") ? 120000 : 0) + (parts.includes("Math") ? 42500 : 0);
+      totalFee = perWeek * period;
+    }
+    if (typeof c.fee === 'object' && (c.name === "SAT 정규반")) {
+      if (parts.length === 1 && parts[0] === "Math") {
+        totalFee = 70000 * period;
+      } else if (parts.length === 1 && parts[0] === "RW") {
+        totalFee = 200000 * period;
+      } else if (parts.length === 2 && parts.includes("RW") && parts.includes("Math")) {
+        totalFee = 270000 * period;
+      } else {
+        totalFee = 0;
+      }
+    }
+  } else if (courseKey === 'sat_bridge2') {
+    let divisionKor = "주말";
+    let timeSlotKor = timeSlot || "오전";
+    displayCourseName = `${c.name} ${divisionKor} ${timeSlotKor}반`.replace(/\s+/g, " ").trim();
+    durationStr = formatCourseDateRange(startDate, period, courseKey, {division: '주말'})?.label || '';
+    let t = timeTable["SAT 브릿지 독해반"]["주말"][timeSlotKor];
+    timeStr = `${t["RW"]} (한국시간 기준)`;
+    totalFee = 120000 * period;
   } else {
-    totalFee = 0;
-  }
-}
-  } else {
-    // AP 과목 자동 접두사 처리
     if (courseKey.startsWith("ap_")) {
       displayCourseName = "AP " + c.name;
     }
@@ -790,7 +717,7 @@ if (typeof c.fee === 'object' && (c.name === "SAT 정규반")) {
     } else {
       durationStr = formatCourseDateRange(startDate, period, courseKey, {division})?.label || '';
     }
-    // 시간
+    
     if (["Cal BC","Phy1","Stat","Chem","Bio"].includes(c.name)) {
       if (!timeSlot) timeSlot = "오전";
       let t = timeTable[c.name][timeSlot];
@@ -800,7 +727,7 @@ if (typeof c.fee === 'object' && (c.name === "SAT 정규반")) {
     } else {
       timeStr = '';
     }
-    // 수강료
+    
     if (typeof c.fee === 'number') {
       totalFee = c.fee * period;
     }
@@ -826,6 +753,7 @@ function showToast(msg) {
   t.textContent = msg; t.style.visibility = "visible"; t.style.opacity = 1;
   setTimeout(()=>{ t.style.opacity = 0; setTimeout(()=>{t.style.visibility='hidden';},500)},2000);
 }
+
 function copyReservationInfo() {
   let name = document.getElementById('infoName').textContent;
   let course = document.getElementById('infoCourse').textContent;
@@ -845,58 +773,50 @@ function copyReservationInfo() {
     .catch(()=> showToast('복사 실패!'));
 }
 
-// 파일의 <script> 구역 가장 아래쪽에 추가!
 function formatCourseDateRange(startDate, period, courseKey, opts = {}) {
   if (!startDate || isNaN(period)) return { label: "" };
   let start = new Date(startDate);
   if (isNaN(start)) return { label: "" };
   let end = new Date(start);
 
-  // SAT 정규반 (평일/주말 구분)
   if (courseKey === 'sat_reg') {
     if (opts.division === '주말') {
-      // 주말반은 항상 일요일
       end.setDate(start.getDate() + (period - 1) * 7);
-      end.setDate(end.getDate() + (7 - end.getDay()) % 7); // 0: 일요일
+      end.setDate(end.getDate() + (7 - end.getDay()) % 7);
     } else {
-      // 평일반은 원하는 요일로! (여기서는 토요일로 예시)
-      const targetDay = 4; // 토요일(6), 금요일(5), 등 변경 가능
+      const targetDay = 4;
       end.setDate(start.getDate() + (period - 1) * 7);
       end.setDate(end.getDate() + ((targetDay - end.getDay() + 7) % 7));
     }
   }
-  // SAT 브릿지 유형반 - 주말/평일 분기
   else if (courseKey === 'sat_bridge') {
     end.setDate(start.getDate() + (period - 1) * 7);
-    // 주말반: 일요일, 평일반: 목요일
     if (opts.division === '주말') {
-      end.setDate(end.getDate() + (7 - end.getDay()) % 7); // 0: 일요일
+      end.setDate(end.getDate() + (7 - end.getDay()) % 7);
     } else {
-      end.setDate(end.getDate() + ((4 - end.getDay() + 7) % 7)); // 4: 목요일
+      end.setDate(end.getDate() + ((4 - end.getDay() + 7) % 7));
     }
   }
-  // TOEFL R/L, S/W, R/L+S/W → 무조건 일요일
+  else if (courseKey === 'sat_bridge2') {
+    end.setDate(start.getDate() + (period - 1) * 7);
+    end.setDate(end.getDate() + (7 - end.getDay()) % 7);
+  }
   else if (["toefl_rl", "toefl_sw", "toefl_rlsw"].includes(courseKey)) {
     end.setDate(start.getDate() + (period - 1) * 7);
     end.setDate(end.getDate() + (7 - end.getDay()) % 7);
   }
-  // DRW L1A, L2A, 미주&국제반: 금요일(5)
   else if (["drw_l1a", "drw_l2a", "drw_americas"].includes(courseKey)) {
     end.setDate(start.getDate() + (period - 1) * 7);
-    end.setDate(end.getDate() + ((5 - end.getDay() + 7) % 7)); // 5: 금요일
+    end.setDate(end.getDate() + ((5 - end.getDay() + 7) % 7));
   }
-  // DRW L1B, L2B, L3, 유럽/남미반: 토요일(6)
   else if (["drw_l1b", "drw_l2b", "drw_l3", "drw_europe"].includes(courseKey)) {
     end.setDate(start.getDate() + (period - 1) * 7);
-    end.setDate(end.getDate() + ((6 - end.getDay() + 7) % 7)); // 6: 토요일
+    end.setDate(end.getDate() + ((6 - end.getDay() + 7) % 7));
   }
-  // 나머지(기존 방식)
   else {
     end.setDate(start.getDate() + (period - 1) * 7);
   }
 
-  // 날짜 포맷팅 (기존과 동일)
-  const weekdayName = ['일', '월', '화', '수', '목', '금', '토'];
   let sm = start.getMonth() + 1, sd = start.getDate(), sw = weekdayName[start.getDay()];
   let em = end.getMonth() + 1, ed = end.getDate(), ew = weekdayName[end.getDay()];
   let label = `${sm}.${sd}(${sw}) ~ ${em}.${ed}(${ew}) (${period}주)`;
