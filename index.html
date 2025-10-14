@@ -302,7 +302,8 @@ const courseEnabledDays = {
   toefl_rl: [6], toefl_sw: [0], toefl_rlsw: [6], toefl_awesome: [6],
   drw_l1a: [1, 3, 5], drw_l2a: [1, 3, 5], drw_americas: [1, 3, 5],
   drw_l1b: [2, 4, 6], drw_l2b: [2, 4, 6],
-  drw_l3: [6, 0], drw_europe: [6, 0],
+  drw_eli_novel: [6, 0], /* ELI novel class: 토, 일 */
+  drw_europe: [6, 0],
   dm_alg1: [6], dm_alg2: [0], dm_geom: [6], dm_alg2pre: [0], dm_igcse: [0]
 };
 let enabledDays = null;
@@ -323,6 +324,11 @@ function setDatepickerEnabledDays() {
   if (courseKey === 'sat_bridge2') {
     key = 'sat_bridge2_weekend';
   }
+
+  if (courseKey === 'drw_eli_novel') {
+    key = 'drw_eli_novel';
+  }
+
   enabledDays = courseEnabledDays[key] || null;
   $('#startDate').datepicker('destroy');
   $('#startDate').val('');
@@ -404,12 +410,12 @@ const courseTree = [
     {val:'toefl_rlsw', label:'TOEFL R/L, S/W'},
     {val:'toefl_awesome', label:'TOEFL 어썸 실전반'}
   ]},
-  {cat:'DRW', items:[
+  {cat:'Junior English', items:[
+    {val:'drw_eli_novel', label:'ELI novel class'},
     {val:'drw_l1a', label:'DRW L1A'},
     {val:'drw_l1b', label:'DRW L1B'},
     {val:'drw_l2a', label:'DRW L2A'},
     {val:'drw_l2b', label:'DRW L2B'},
-    {val:'drw_l3', label:'DRW L3'},
     {val:'drw_americas', label:'DRW 미주&국제반'},
     {val:'drw_europe', label:'DRW 유럽/남미반'}
   ]},
@@ -570,7 +576,7 @@ document.getElementById('course').onchange = function() {
       html += '</div></div>';
       box.innerHTML = html;
     } else if (
-      ['ap_calbc','ap_phy1','ap_stat','ap_chem','ap_bio'].includes(v)
+      ['ap_calbc','ap_phy1','ap_stat','ap_chem','ap_bio',  'drw_eli_novel'].includes(v)
     ) {
       let html = '<div class="option-group">';
       html += '<div class="option-row"><b>시간대:</b>';
@@ -608,11 +614,11 @@ const courseInfo = {
   toefl_sw:     {name:"TOEFL S/W", min:1, max:12, durationType:"week", fee:150000},
   toefl_rlsw:   {name:"TOEFL R/L, S/W", min:1, max:12, durationType:"week", fee:300000},
   toefl_awesome:{name:"TOEFL 어썸 실전반", min:1, max:4, durationType:"set", fee:190000},
+  drw_eli_novel:{name:"ELI novel class", min:1, max:12, durationType:"week", fee:108000},
   drw_l1a:      {name:"DRW L1A", min:1, max:12, durationType:"week", fee:162000},
   drw_l1b:      {name:"DRW L1B", min:1, max:12, durationType:"week", fee:162000},
   drw_l2a:      {name:"DRW L2A", min:1, max:12, durationType:"week", fee:162000},
   drw_l2b:      {name:"DRW L2B", min:1, max:12, durationType:"week", fee:162000},
-  drw_l3:       {name:"DRW L3", min:1, max:12, durationType:"week", fee:162000},
   drw_americas: {name:"DRW 미주&국제반", min:1, max:12, durationType:"week", fee:162000},
   drw_europe:   {name:"DRW 유럽/남미반", min:1, max:12, durationType:"week", fee:162000},
   dm_alg1:      {name:"Algebra 1", min:1, max:12, durationType:"week", fee:80000},
@@ -678,9 +684,9 @@ const timeTable = {
   "DRW L1B": "20:00~22:00",
   "DRW L2A": "20:00~22:00",
   "DRW L2B": "20:00~22:00",
-  "DRW L3": "20:00~23:00",
   "DRW 미주&국제반": "10:00~12:00",
   "DRW 유럽/남미반": "20:00~23:00",
+  "ELI novel class": { "오전": "10:00~12:00", "저녁": "18:00~20:00" },
   "Algebra 1": "11:10~13:10",
   "Algebra 2": "11:10~13:10",
   "Geometry": "11:10~13:10",
@@ -787,11 +793,13 @@ function calculateTuition() {
     let t = timeTable["SAT 브릿지 독해반"]["주말"][timeSlotKor];
     timeStr = `${t["RW"]} (한국시간 기준)`;
     totalFee = 120000 * period;
-  } else {
+} else {
+    // 1. 과목 이름 표시 (AP 접두사)
     if (courseKey.startsWith("ap_")) {
       displayCourseName = "AP " + c.name;
     }
 
+    // 2. 수강 기간 계산 (TOEFL 어썸 실전반/set/week)
     if (courseKey === 'toefl_awesome') {
       let start = new Date(startDate);
       let day = start.getDay();
@@ -813,16 +821,30 @@ function calculateTuition() {
       durationStr = formatCourseDateRange(startDate, period, courseKey, {division})?.label || '';
     }
     
-    if (["Cal BC","Phy1","Stat","Chem","Bio"].includes(c.name)) {
-      if (!timeSlot) timeSlot = "오전";
-      let t = timeTable[c.name][timeSlot];
-      timeStr = `${t} (한국시간 기준)`;
-    } else if (timeTable[c.name]) {
-      timeStr = `${timeTable[c.name]} (한국시간 기준)`;
-    } else {
-      timeStr = '';
+    // 3. 수업 시간 처리 (가장 마지막에 위치해야 함)
+    let courseTimeData = timeTable[c.name];
+
+    if (typeof courseTimeData === 'object' && courseTimeData !== null) {
+      // AP (AM/PM 옵션) 및 ELI novel class 처리
+      if (!timeSlot) timeSlot = "오전"; // 시간대 옵션이 없을 경우 기본값으로 '오전' 설정
+      
+      // ELI novel class의 경우 displayCourseName도 수정
+      if (courseKey === 'drw_eli_novel') {
+        displayCourseName = `${c.name} ${timeSlot}반`;
+      }
+
+      let t = courseTimeData[timeSlot];
+      if (t) {
+        timeStr = `${t} (한국시간 기준)`;
+      } else {
+        timeStr = '시간 정보 오류';
+      }
+    } else if (typeof courseTimeData === 'string') {
+      // 고정 시간대 과목 (Phy C-M, Macro Econ, TOEFL 등) 처리
+      timeStr = `${courseTimeData} (한국시간 기준)`;
     }
     
+    // 4. 수강료 계산
     if (typeof c.fee === 'number') {
       totalFee = c.fee * period;
     }
@@ -904,9 +926,14 @@ function formatCourseDateRange(startDate, period, courseKey, opts = {}) {
     end.setDate(start.getDate() + (period - 1) * 7);
     end.setDate(end.getDate() + ((5 - end.getDay() + 7) % 7));
   }
-  else if (["drw_l1b", "drw_l2b", "drw_l3", "drw_europe"].includes(courseKey)) {
+  else if (["drw_l1b", "drw_l2b"].includes(courseKey)) {
     end.setDate(start.getDate() + (period - 1) * 7);
     end.setDate(end.getDate() + ((6 - end.getDay() + 7) % 7));
+  }
+  else if (["drw_europe", "drw_eli_novel"].includes(courseKey)) {
+    // DRW 주말 수업(토, 일)은 일요일(0) 종료
+    end.setDate(start.getDate() + (period - 1) * 7);
+    end.setDate(end.getDate() + ((0 - end.getDay() + 7) % 7));
   }
   else {
     end.setDate(start.getDate() + (period - 1) * 7);
